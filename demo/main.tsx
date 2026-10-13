@@ -4,7 +4,7 @@ import OlMap from 'ol/Map.js';
 import View from 'ol/View.js';
 import 'ol/ol.css';
 import {
-    attribution, dateText, grid, legend, northArrow, QUALITY, saveBlob, scaleBar, text, title, toBlob, toPdf,
+    attribution, dateText, graticule, grid, legend, northArrow, overviewMap, QUALITY, saveBlob, scaleBar, text, title, toBlob, toPdf,
     type ExportOptions, type LayoutKind, type Quality, type Sheet,
 } from 'cartela';
 import { useMapExport, usePrintFrame } from 'cartela/react';
@@ -15,6 +15,15 @@ declare global {
     interface Window {
         cartela?: { map: OlMap; sheet: Sheet | null; pdf: () => Promise<string> };
     }
+}
+
+type GridKind = 'none' | 'divisions' | 'lonlat' | 'utm';
+
+function gridElements(kind: GridKind) {
+    if (kind === 'divisions') return [grid()];
+    if (kind === 'lonlat') return [graticule()];
+    if (kind === 'utm') return [graticule({ crs: 'utm' })];
+    return [];
 }
 
 function useMap(): [React.RefObject<HTMLDivElement | null>, OlMap | null] {
@@ -42,7 +51,8 @@ function App() {
     const [layout, setLayout] = useState<LayoutKind>('right');
     const [quality, setQuality] = useState<Quality>('normal');
     const [longLegend, setLongLegend] = useState(false);
-    const [withGrid, setWithGrid] = useState(true);
+    const [gridKind, setGridKind] = useState<GridKind>('divisions');
+    const [withOverview, setWithOverview] = useState(false);
     const [urls, setUrls] = useState<string[]>([]);
     const job = useMapExport(map);
 
@@ -57,9 +67,10 @@ function App() {
             attribution({ prefix: '© ' }),
             scaleBar({ ratio: true, locale: 'es-MX' }),
             northArrow(),
-            ...(withGrid ? [grid()] : []),
+            ...gridElements(gridKind),
+            ...(withOverview ? [overviewMap({ layers: () => [cellsLayer(), routeLayer()], position: 'bottom-right' })] : []),
         ],
-    }), [mapTitle, layout, quality, longLegend, withGrid]);
+    }), [mapTitle, layout, quality, longLegend, gridKind, withOverview]);
 
     const frame = usePrintFrame(map, options);
 
@@ -115,7 +126,15 @@ function App() {
                         {Object.entries(QUALITY).map(([key, dpi]) => <option key={key} value={key}>{`${key} · ${dpi} dpi`}</option>)}
                     </select>
                 </label>
-                <label className="check"><input type="checkbox" checked={withGrid} onChange={e => setWithGrid(e.target.checked)} />Retícula</label>
+                <label>Retícula
+                    <select value={gridKind} onChange={e => setGridKind(e.target.value as GridKind)} data-testid="grid">
+                        <option value="none">Ninguna</option>
+                        <option value="divisions">Divisiones</option>
+                        <option value="lonlat">Lon/lat</option>
+                        <option value="utm">UTM</option>
+                    </select>
+                </label>
+                <label className="check"><input type="checkbox" checked={withOverview} onChange={e => setWithOverview(e.target.checked)} data-testid="overview" />Minimapa</label>
                 <label className="check"><input type="checkbox" checked={longLegend} onChange={e => setLongLegend(e.target.checked)} data-testid="long" />Leyenda larga</label>
                 <div className="row">
                     <button type="button" onClick={() => job.run(options)} disabled={!map || running} data-testid="export">Exportar</button>

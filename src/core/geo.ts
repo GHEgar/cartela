@@ -19,6 +19,22 @@ export function pixelToCoordinate(
     ];
 }
 
+export function coordinateToPixel(
+    center: Coordinate,
+    resolution: number,
+    rotation: number,
+    size: Size,
+    coordinate: Coordinate,
+): Coordinate {
+    const dx = (coordinate[0] ?? 0) - (center[0] ?? 0);
+    const dy = (coordinate[1] ?? 0) - (center[1] ?? 0);
+    const cos = Math.cos(rotation);
+    const sin = Math.sin(rotation);
+    const u = dx * cos + dy * sin;
+    const v = -dx * sin + dy * cos;
+    return [size[0] / 2 + u / resolution, size[1] / 2 - v / resolution];
+}
+
 export function rotatedExtent(center: Coordinate, resolution: number, rotation: number, size: Size): Extent {
     const corners = [[0, 0], [size[0], 0], [size[0], size[1]], [0, size[1]]]
         .map(pixel => pixelToCoordinate(center, resolution, rotation, size, pixel));

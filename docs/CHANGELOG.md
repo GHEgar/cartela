@@ -5,6 +5,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+## [0.3.0] - 2026-10-13
+
+### Agregado
+
+- `graticule`: retícula en valores redondos de lon/lat, UTM o cualquier proyección registrada en
+  OpenLayers. Las líneas se trazan como curvas, funciona con la vista rotada y etiqueta los cruces
+  con los cuatro bordes sin encimar etiquetas ni salirse de las esquinas. Intervalo automático en
+  pasos de grados, minutos y segundos o de 1, 2, 2,5 y 5 metros por potencia de diez.
+- `toUtm`, `fromUtm` y `utmZone`: transversa de Mercator con la serie de Krüger sobre WGS 84, sin
+  dependencias, con zona y hemisferio forzables.
+- `overviewMap`: minimapa con las capas que da la app (fábrica de capas) y la huella del marco,
+  rotada si la vista lo está; en esquina del mapa o en el panel. En video se carga una vez y la
+  huella se mueve en cada cuadro.
+- `DrawEnv.toPixel`, `coordinateToPixel` y `formatMeters`.
+- Demo con selector de retícula y minimapa; pruebas de UTM, intervalos y cruces, y e2e de hoja con
+  retícula UTM y minimapa.
+
 ## [0.2.0] - 2026-10-13
 
 ### Agregado

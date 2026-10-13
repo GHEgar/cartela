@@ -147,6 +147,7 @@ export interface DrawEnv {
     pt: (value: number) => number;
     font: (size: number, weight?: string) => string;
     toCoordinate: (x: number, y: number) => Coordinate;
+    toPixel: (coordinate: Coordinate) => [number, number];
 }
 
 export type Corner = 'top-left' | 'top-right' | 'bottom-left' | 'bottom-right';

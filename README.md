@@ -11,7 +11,7 @@ npm install cartela ol
 ```
 
 ```ts
-import { exportMap, toPdf, saveBlob, title, legend, scaleBar, northArrow, grid, attribution, wmsLegends } from 'cartela';
+import { exportMap, toPdf, saveBlob, title, legend, scaleBar, northArrow, graticule, overviewMap, attribution, wmsLegends } from 'cartela';
 
 const sheet = await exportMap(map, {
     page: { size: 'letter', orientation: 'landscape', dpi: 200 },
@@ -22,7 +22,8 @@ const sheet = await exportMap(map, {
         attribution(),
         scaleBar({ ratio: true }),
         northArrow(),
-        grid({ divisions: [4, 3] }),
+        graticule({ crs: 'utm' }),
+        overviewMap({ layers: () => [new TileLayer({ source: new OSM() })] }),
     ],
 });
 saveBlob(await toPdf(sheet, { title: 'Population 2020' }), 'map.pdf');
@@ -35,8 +36,11 @@ saveBlob(await toPdf(sheet, { title: 'Population 2020' }), 'map.pdf');
 | Render the live map at print size and restore it afterwards | `renderMap`, `freeze` option |
 | Paper sizes, orientation, DPI, pixel budget with automatic clamp | `page`, `QUALITY`, `maxPixels` |
 | Panel on the right, left, a bottom band or none | `layout` |
-| Elements: title, text, date, image, legend, scale bar, north arrow, grid, attribution | `title`, `text`, `dateText`, `image`, `legend`, `scaleBar`, `northArrow`, `grid`, `attribution` |
+| Elements: title, text, date, image, legend, scale bar, north arrow, grid, graticule, overview map, attribution | `title`, `text`, `dateText`, `image`, `legend`, `scaleBar`, `northArrow`, `grid`, `graticule`, `overviewMap`, `attribution` |
 | Legends from symbols, images or WMS `GetLegendGraphic`; overflow onto extra pages | `legend`, `wmsLegends` |
+| Graticule at round values in lon/lat, UTM or any registered projection, with edge labels | `graticule` |
+| UTM conversion (Krüger series, WGS 84) without proj4 | `toUtm`, `fromUtm`, `utmZone` |
+| Overview map with the frame footprint, from layers you provide | `overviewMap` |
 | Preview with the same pipeline at low DPI | `previewMap` |
 | On-screen guide of what will be printed | `printFrame`, `watchPrintFrame`, `usePrintFrame` |
 | PNG, JPEG, WebP and a dependency-free PDF writer | `toBlob`, `toBlobs`, `toPdf`, `saveBlob` |
@@ -81,6 +85,9 @@ recorded; print-only apps never load them.
 `cartela` is the framework-free core; `cartela/video` records video; `cartela/react` adds
 `useMapExport`, `usePrintFrame` and `useMapVideo`.
 `npm run demo` runs a playground.
+
+`overviewMap` takes a factory, `layers: () => BaseLayer[]`, because an OpenLayers layer cannot live in
+two maps at once.
 
 Raster sources must load with `crossOrigin: 'anonymous'`; otherwise the canvas is tainted and
 `exportMap` throws `TaintedCanvasError`.

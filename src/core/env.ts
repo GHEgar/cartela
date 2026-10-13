@@ -1,4 +1,4 @@
-import { pixelToCoordinate } from './geo.js';
+import { coordinateToPixel, pixelToCoordinate } from './geo.js';
 import { mmToPx, ptToPx } from './units.js';
 import type { DrawEnv, MapSnapshot, SheetLayout, Theme } from './types.js';
 
@@ -20,6 +20,10 @@ export function createEnv(dpi: number, theme: Theme, snapshot: MapSnapshot, layo
             snapshot.size,
             [((x - frame.x) / frame.width) * snapshot.size[0], ((y - frame.y) / frame.height) * snapshot.size[1]],
         ),
+        toPixel: coordinate => {
+            const [px = 0, py = 0] = coordinateToPixel(snapshot.center, snapshot.resolution, snapshot.rotation, snapshot.size, coordinate);
+            return [frame.x + (px / snapshot.size[0]) * frame.width, frame.y + (py / snapshot.size[1]) * frame.height];
+        },
     };
 }
 

@@ -18,7 +18,11 @@ function formatter(format: CoordinateFormat): (value: number, axis: 'lon' | 'lat
     return formatDegrees;
 }
 
-const labelSize = (theme: Theme): number => theme.fontSize * 0.85;
+export const labelSize = (theme: Theme): number => theme.fontSize * 0.85;
+
+export function labelBand(theme: Theme): number {
+    return (labelSize(theme) * MM_PER_INCH) / 72 * 1.3 + 1.2 + theme.frameWidth;
+}
 
 export function grid(options: GridOptions = {}): SheetElement {
     const [nx, ny] = options.divisions ?? [4, 3];
@@ -100,7 +104,7 @@ export function grid(options: GridOptions = {}): SheetElement {
         slot: 'frame',
         reserve: theme => {
             if (!labels) return {};
-            const band = (labelSize(theme) * MM_PER_INCH) / 72 * 1.3 + 1.2 + theme.frameWidth;
+            const band = labelBand(theme);
             return { top: band, right: band, bottom: band, left: band };
         },
         draw: paint,
