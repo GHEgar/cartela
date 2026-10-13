@@ -17,6 +17,9 @@
         "skipLibCheck": true,
         "types": [],
         "paths": {
+            "cartela/video": [
+                "./src/video/index.ts"
+            ],
             "cartela/react": [
                 "./src/react/index.ts"
             ],

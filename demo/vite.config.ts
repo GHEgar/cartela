@@ -10,6 +10,7 @@ export default defineConfig({
     plugins: [react()],
     resolve: {
         alias: [
+            { find: /^cartela\/video$/, replacement: src('video/index.ts') },
             { find: /^cartela\/react$/, replacement: src('react/index.ts') },
             { find: /^cartela$/, replacement: src('core/index.ts') },
         ],

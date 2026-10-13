@@ -20,6 +20,15 @@ export class RenderTimeoutError extends CartelaError {
     }
 }
 
+export class UnsupportedFormatError extends CartelaError {
+    readonly format: string;
+
+    constructor(format: string) {
+        super(`This browser cannot encode ${format}`);
+        this.format = format;
+    }
+}
+
 export function abortError(signal?: AbortSignal): Error {
     const reason: unknown = signal?.reason;
     if (reason instanceof Error) return reason;

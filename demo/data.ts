@@ -39,10 +39,13 @@ export function cellsLayer(): VectorLayer {
     });
 }
 
+export function routeLine(): LineString {
+    return new LineString([[-103.55, 20.5], [-103.4, 20.62], [-103.25, 20.58], [-103.12, 20.8]].map(c => fromLonLat(c)));
+}
+
 export function routeLayer(): VectorLayer {
-    const points = [[-103.55, 20.5], [-103.4, 20.62], [-103.25, 20.58], [-103.12, 20.8]].map(c => fromLonLat(c));
     return new VectorLayer({
-        source: new VectorSource({ features: [new Feature(new LineString(points))] }),
+        source: new VectorSource({ features: [new Feature(routeLine())] }),
         style: new Style({ stroke: new Stroke({ color: '#c2410c', width: 3 }) }),
         properties: { title: 'Ruta' },
     });

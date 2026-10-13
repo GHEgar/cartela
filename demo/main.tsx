@@ -9,6 +9,7 @@ import {
 } from 'cartela';
 import { useMapExport, usePrintFrame } from 'cartela/react';
 import { CENTER, cellsLayer, classEntries, routeLayer, swatchImage } from './data';
+import { VideoPanel } from './video';
 
 declare global {
     interface Window {
@@ -127,6 +128,7 @@ function App() {
                     {job.sheet ? ` · ${job.sheet.pages.length} pág. · ${job.sheet.geometry.size.join('×')} px` : ''}
                     {job.error ? ` · ${job.error.message}` : ''}
                 </span>
+                <VideoPanel map={map} />
                 <div className="pages">{urls.map(url => <img key={url} src={url} alt="Página exportada" />)}</div>
             </aside>
         </div>

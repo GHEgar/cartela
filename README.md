@@ -1,9 +1,10 @@
 # cartela
 
-Headless print export for [OpenLayers](https://openlayers.org) maps. cartela renders the map straight
-into a canvas sized for paper and DPI, composes a sheet around it — title, legend, scale bar, north
-arrow, coordinate grid, attributions — and hands you PNG, JPEG, WebP or PDF. It ships no CSS, no
-brand and no UI: you build the dialog, cartela builds the sheet.
+Headless print and video export for [OpenLayers](https://openlayers.org) maps. cartela renders the map
+straight into a canvas sized for paper and DPI, composes a sheet around it — title, legend, scale bar,
+north arrow, coordinate grid, attributions — and hands you PNG, JPEG, WebP or PDF. It also records the
+map frame by frame along a route or around a centre and hands you MP4, WebM or GIF. It ships no CSS,
+no brand and no UI: you build the dialog, cartela builds the sheet.
 
 ```bash
 npm install cartela ol
@@ -42,7 +43,43 @@ saveBlob(await toPdf(sheet, { title: 'Population 2020' }), 'map.pdf');
 | Progress, cancellation and typed errors | `onProgress`, `signal`, `TaintedCanvasError`, `RenderTimeoutError` |
 | Custom elements: anything that implements `SheetElement` | `measure`, `size`, `draw`, `load`, `reserve` |
 
-`cartela` is the framework-free core; `cartela/react` adds `useMapExport` and `usePrintFrame`.
+## Video
+
+```bash
+npm install mediabunny gifenc
+```
+
+```ts
+import { attribution, northArrow, saveBlob, scaleBar, title } from 'cartela';
+import { gifEncoder, pickFormat, planRoute, recordMap, recordingDefaults, videoEncoder, videoSupport } from 'cartela/video';
+
+const format = pickFormat('mp4', await videoSupport());
+if (!format) throw new Error('No video format available');
+const { fps, size } = recordingDefaults(format);
+const plan = planRoute(map, route, { fps, size, duration: 12, rotate: true });
+
+const video = await recordMap(map, plan, {
+    encoder: format === 'gif' ? gifEncoder() : videoEncoder({ container: format, quality: 'high' }),
+    elements: [title('Route', { slot: 'map' }), scaleBar(), northArrow(), attribution({ slot: 'map' })],
+    trail: { route },
+});
+saveBlob(video.blob, `route${video.extension}`);
+```
+
+| Feature | API |
+|---|---|
+| Frame plans: follow a `LineString` at constant ground speed, or orbit around a centre | `planRoute`, `planOrbit`, or any `FramePlan` |
+| Deterministic recording: every frame waits for the map to finish rendering | `recordMap` |
+| Growing trail and heading marker over the route | `trail` |
+| Sheet elements over every frame; scale bar and north arrow follow the view | `elements` (`map` and `frame` slots) |
+| MP4 and WebM through WebCodecs, GIF as a fallback | `videoEncoder`, `gifEncoder`, or your own `EncoderFactory` |
+| Support detection and format fallback | `videoSupport`, `pickFormat`, `UnsupportedFormatError` |
+
+`mediabunny` and `gifenc` are optional peers, loaded with a dynamic `import()` only when a video is
+recorded; print-only apps never load them.
+
+`cartela` is the framework-free core; `cartela/video` records video; `cartela/react` adds
+`useMapExport`, `usePrintFrame` and `useMapVideo`.
 `npm run demo` runs a playground.
 
 Raster sources must load with `crossOrigin: 'anonymous'`; otherwise the canvas is tainted and

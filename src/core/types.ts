@@ -84,6 +84,27 @@ export interface MapSnapshot {
     attributions: string[];
 }
 
+export interface ViewState {
+    center: Coordinate;
+    resolution: number;
+    rotation: number;
+}
+
+export interface SessionOptions {
+    size: Size;
+    pixelRatio?: number;
+    freeze?: boolean;
+    timeout?: number;
+}
+
+export interface MapSession {
+    readonly canvas: HTMLCanvasElement;
+    readonly size: Size;
+    readonly pixelRatio: number;
+    render: (state: ViewState, signal?: AbortSignal) => Promise<MapSnapshot>;
+    close: () => void;
+}
+
 export type Phase = 'layout' | 'render' | 'load' | 'compose' | 'encode';
 
 export interface Progress {

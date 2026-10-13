@@ -5,6 +5,29 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+## [0.2.0] - 2026-10-13
+
+### Agregado
+
+- `cartela/video`: grabación del mapa como video, cuadro por cuadro y sin depender del tiempo real.
+  - `recordMap` graba cualquier `FramePlan` en una sola sesión de target canvas, con estela de ruta
+    y los elementos de la hoja sobre cada cuadro.
+  - `planRoute` recorre un `LineString` a velocidad constante sobre la longitud geodésica, con
+    seguimiento, rumbo suavizado, pausas y easing. `planOrbit` gira la vista y cierra el loop sin
+    repetir cuadro.
+  - `videoEncoder` (MP4 y WebM con mediabunny) y `gifEncoder` (GIF con gifenc), ambos peers
+    opcionales cargados con `import()` dinámico.
+  - `videoSupport`, `pickFormat` y `recordingDefaults` para detectar soporte y elegir formato.
+- `openSession`: sesión reutilizable de target canvas para renderizar varias vistas seguidas.
+- `UnsupportedFormatError`.
+- `title` y `text` aceptan `slot: 'map'` con `position`, `halo` y `maxWidth` para ir sobre el mapa.
+- `cartela/react`: `useMapVideo`.
+- Demo con grabación de ruta y órbita, y pruebas de planes y de los tres formatos.
+
+### Cambiado
+
+- `renderMap` usa `openSession` por dentro; su API y su comportamiento no cambian.
+
 ## [0.1.0] - 2026-10-09
 
 ### Agregado
