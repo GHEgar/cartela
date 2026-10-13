@@ -47,3 +47,42 @@ for (const format of ['mp4', 'webm', 'gif'] as const) {
         });
     }
 }
+
+function topBoxes(bytes: number[]): string[] {
+    const boxes: string[] = [];
+    let offset = 0;
+    while (offset + 8 <= bytes.length && boxes.length < 32) {
+        const size = (((bytes[offset] ?? 0) << 24) >>> 0) + ((bytes[offset + 1] ?? 0) << 16) + ((bytes[offset + 2] ?? 0) << 8) + (bytes[offset + 3] ?? 0);
+        boxes.push(String.fromCharCode(...bytes.slice(offset + 4, offset + 8)));
+        if (size < 8) break;
+        offset += size;
+    }
+    return boxes;
+}
+
+for (const format of ['mp4', 'webm', 'gif'] as const) {
+    test(`streams ${format} to a writable target`, async ({ page }) => {
+        const supported = await page.evaluate(f => window.cartelaVideo?.support?.[f] ?? false, format);
+        test.skip(!supported, `${format} is not supported by this browser`);
+        const result = await page.evaluate(f => window.cartelaVideo?.streamed(f), format);
+        expect(result?.blob).toBe(false);
+        expect(result?.closed).toBe(true);
+        expect(HEADERS[format]?.(result?.bytes ?? [])).toBe(true);
+        if (format === 'mp4') {
+            const boxes = topBoxes(result?.bytes ?? []);
+            expect(boxes[0]).toBe('ftyp');
+            expect(boxes.indexOf('moov')).toBeGreaterThan(0);
+            expect(boxes.indexOf('moov')).toBeLessThan(boxes.indexOf('mdat'));
+        }
+    });
+}
+
+test('aborts the target when the recording is cancelled', async ({ page }) => {
+    const supported = await page.evaluate(() => window.cartelaVideo?.support?.mp4 ?? false);
+    test.skip(!supported, 'mp4 is not supported by this browser');
+    const result = await page.evaluate(() => window.cartelaVideo?.streamed('mp4', 0.5));
+    expect(result?.aborted).toBe(true);
+    expect(result?.closed).toBe(false);
+    const layers = await page.evaluate(() => window.cartela?.map.getAllLayers().length);
+    expect(layers).toBe(2);
+});

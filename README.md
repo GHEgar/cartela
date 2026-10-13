@@ -78,6 +78,17 @@ saveBlob(video.blob, `route${video.extension}`);
 | Sheet elements over every frame; scale bar and north arrow follow the view | `elements` (`map` and `frame` slots) |
 | MP4 and WebM through WebCodecs, GIF as a fallback | `videoEncoder`, `gifEncoder`, or your own `EncoderFactory` |
 | Support detection and format fallback | `videoSupport`, `pickFormat`, `UnsupportedFormatError` |
+| Write straight to disk while encoding | `target`, `fileTarget`, `canPickFile` |
+
+Long recordings can go straight to disk instead of memory. Pass a `target` (a `WritableStream` of
+positioned chunks, such as the one `showSaveFilePicker` returns) and `video.blob` comes back `null`.
+MP4 keeps fast start with `fastStart: 'reserve'`, and a cancelled recording aborts the stream, so no
+half-written file is left behind:
+
+```ts
+const target = await fileTarget('route.mp4', 'video/mp4');
+await recordMap(map, plan, { encoder: videoEncoder({ container: 'mp4', target: target ?? undefined }) });
+```
 
 `mediabunny` and `gifenc` are optional peers, loaded with a dynamic `import()` only when a video is
 recorded; print-only apps never load them.

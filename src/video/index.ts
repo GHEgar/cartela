@@ -5,4 +5,5 @@ export { measureRoute, type RouteMeasure } from './measure.js';
 export { videoSupport, pickFormat, FORMAT_ORDER } from './support.js';
 export { videoEncoder, type VideoEncoderOptions, type Container, type VideoQuality } from './encoders/media.js';
 export { gifEncoder, gifDelay, type GifEncoderOptions } from './encoders/gif.js';
+export { fileTarget, canPickFile } from './target.js';
 export type * from './types.js';

@@ -5,6 +5,23 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+## [0.4.0] - 2026-10-13
+
+### Agregado
+
+- Video directo a disco: `videoEncoder` y `gifEncoder` aceptan `target`, un `WritableStream` de
+  bloques con posición, como el de `showSaveFilePicker`. El archivo se escribe mientras se codifica.
+  El MP4 conserva fast start con `fastStart: 'reserve'`, y el GIF vacía el búfer de gifenc en cada
+  cuadro.
+- `fileTarget` y `canPickFile` para pedir el archivo con el selector del navegador.
+- Al cancelar, el stream se aborta en vez de cerrarse, así que no queda un archivo a medias.
+
+### Cambiado
+
+- `Video.blob` es `Blob | null`: es `null` cuando el video se escribió en un `target`.
+- `EncoderFactory` recibe un tercer argumento, el número de cuadros. Las fábricas propias que
+  existan siguen funcionando.
+
 ### Cambiado
 
 - El lint usa `@ghegar/eslint-config` (presets `base`, `react` y `ts`) en lugar de una config propia.

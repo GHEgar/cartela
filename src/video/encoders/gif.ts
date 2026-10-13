@@ -1,9 +1,11 @@
 import { UnsupportedFormatError } from '../../core/errors.js';
-import type { EncoderFactory } from '../types.js';
+import { relay } from '../target.js';
+import type { EncoderFactory, VideoTarget } from '../types.js';
 
 export interface GifEncoderOptions {
     colors?: number;
     loop?: boolean | number;
+    target?: VideoTarget;
 }
 
 export function gifDelay(timestamp: number, duration: number): number {
@@ -24,6 +26,16 @@ export function gifEncoder(options: GifEncoderOptions = {}): EncoderFactory {
         if (!gifenc) throw new UnsupportedFormatError('gif');
         const { GIFEncoder, quantize, applyPalette } = gifenc;
         const gif = GIFEncoder();
+        const stream = options.target ? relay(options.target) : null;
+        let position = 0;
+        const flush = async (): Promise<void> => {
+            if (!stream) return;
+            const data = new Uint8Array(gif.bytes());
+            gif.stream.reset();
+            if (!data.length) return;
+            await stream.write({ type: 'write', data, position });
+            position += data.length;
+        };
         return {
             mimeType: 'image/gif',
             extension: '.gif',
@@ -38,13 +50,18 @@ export function gifEncoder(options: GifEncoderOptions = {}): EncoderFactory {
                     delay: gifDelay(timestamp, duration),
                     repeat,
                 });
+                await flush();
             },
             finish: async () => {
                 gif.finish();
-                return new Blob([gif.bytes() as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
+                if (!stream) return new Blob([gif.bytes() as Uint8Array<ArrayBuffer>], { type: 'image/gif' });
+                await flush();
+                await stream.close();
+                return null;
             },
             cancel: async () => {
                 gif.reset();
+                await stream?.abort(new DOMException('The recording was cancelled', 'AbortError'));
             },
         };
     };

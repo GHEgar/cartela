@@ -19,11 +19,19 @@ export interface FrameEncoder {
     readonly extension: string;
     readonly readsPixels: boolean;
     add: (canvas: HTMLCanvasElement, timestamp: number, duration: number) => Promise<void>;
-    finish: () => Promise<Blob>;
+    finish: () => Promise<Blob | null>;
     cancel: () => Promise<void>;
 }
 
-export type EncoderFactory = (size: Size, fps: number) => Promise<FrameEncoder>;
+export type EncoderFactory = (size: Size, fps: number, frames: number) => Promise<FrameEncoder>;
+
+export interface FileChunk {
+    type: 'write';
+    data: Uint8Array<ArrayBuffer>;
+    position: number;
+}
+
+export type VideoTarget = WritableStream<FileChunk>;
 
 export interface TrailOptions {
     route: LineString;
@@ -48,7 +56,7 @@ export interface RecordOptions {
 }
 
 export interface Video {
-    blob: Blob;
+    blob: Blob | null;
     mimeType: string;
     extension: string;
     size: Size;

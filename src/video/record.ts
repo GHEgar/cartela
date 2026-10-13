@@ -45,7 +45,7 @@ export async function recordMap(map: OlMap, plan: FramePlan, options: RecordOpti
     const layout: SheetLayout = { page: box, content: box, frame: box, panels: [] };
 
     report('load', 0);
-    const encoder: FrameEncoder = await options.encoder(size, fps);
+    const encoder: FrameEncoder = await options.encoder(size, fps, frames.length);
     const canvas = frameCanvas(size, encoder.readsPixels);
     const ctx = context(canvas);
     const session = openSession(map, {

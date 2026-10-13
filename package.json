@@ -1,6 +1,6 @@
 {
     "name": "cartela",
-    "version": "0.3.0",
+    "version": "0.4.0",
     "description": "Headless print and video export for OpenLayers maps: page layout, legends, scale bar, graticule, UTM, overview map, preview frame, PNG, PDF, MP4, WebM and GIF.",
     "license": "AGPL-3.0-only",
     "author": "Edgar Villarreal",

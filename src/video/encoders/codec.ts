@@ -4,8 +4,9 @@ import type { Size } from '../../core/types.js';
 export type Container = 'mp4' | 'webm';
 export type Mediabunny = typeof import('mediabunny');
 
-export function outputFormat(mb: Mediabunny, container: Container): Mp4OutputFormat | WebMOutputFormat {
-    return container === 'mp4' ? new mb.Mp4OutputFormat({ fastStart: 'in-memory' }) : new mb.WebMOutputFormat();
+export function outputFormat(mb: Mediabunny, container: Container, streamed = false): Mp4OutputFormat | WebMOutputFormat {
+    if (container === 'webm') return new mb.WebMOutputFormat();
+    return new mb.Mp4OutputFormat({ fastStart: streamed ? 'reserve' : 'in-memory' });
 }
 
 export async function encodableCodec(mb: Mediabunny, container: Container, size: Size): Promise<VideoCodec | null> {

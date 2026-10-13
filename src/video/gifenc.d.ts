@@ -15,6 +15,7 @@ declare module 'gifenc' {
         finish: () => void;
         bytes: () => Uint8Array;
         reset: () => void;
+        readonly stream: { reset: () => void };
     }
 
     export function GIFEncoder(options?: { initialCapacity?: number; auto?: boolean }): Encoder;
