@@ -33,9 +33,9 @@ export function cellsLayer(): VectorLayer {
         stroke: new Stroke({ color: '#ffffff', width: 0.5 }),
     }));
     return new VectorLayer({
-        source: new VectorSource({ features, attributions: 'Datos sintéticos de cartela' }),
+        source: new VectorSource({ features, attributions: 'Synthetic data by cartela' }),
         style: feature => styles[feature.get('class') as number] ?? styles[0],
-        properties: { title: 'Celdas' },
+        properties: { title: 'Cells' },
     });
 }
 
@@ -47,18 +47,18 @@ export function routeLayer(): VectorLayer {
     return new VectorLayer({
         source: new VectorSource({ features: [new Feature(routeLine())] }),
         style: new Style({ stroke: new Stroke({ color: '#c2410c', width: 3 }) }),
-        properties: { title: 'Ruta' },
+        properties: { title: 'Route' },
     });
 }
 
 export const CENTER = fromLonLat([ORIGIN[0] + 6 * STEP, ORIGIN[1] + 4.5 * STEP]);
 
 export function classEntries(long: boolean): SymbolEntry[] {
-    const base: SymbolEntry[] = CLASSES.map((fill, i) => ({ label: `Clase ${i + 1}`, fill, stroke: '#94a3b8' }));
-    base.push({ label: 'Ruta', stroke: '#c2410c', shape: 'line' });
+    const base: SymbolEntry[] = CLASSES.map((fill, i) => ({ label: `Class ${i + 1}`, fill, stroke: '#94a3b8' }));
+    base.push({ label: 'Route', stroke: '#c2410c', shape: 'line' });
     if (!long) return base;
     const extra = Array.from({ length: 70 }, (_, i) => ({
-        label: `Categoría adicional ${i + 1} con un nombre largo para probar el ajuste de línea`,
+        label: `Additional category ${i + 1} with a long name to test line wrapping`,
         fill: CLASSES[i % CLASSES.length] ?? '#ccc',
         shape: i % 2 ? 'circle' as const : 'box' as const,
     }));

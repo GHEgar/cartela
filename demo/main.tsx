@@ -47,7 +47,7 @@ function useMap(): [React.RefObject<HTMLDivElement | null>, OlMap | null] {
 
 function App() {
     const [target, map] = useMap();
-    const [mapTitle, setTitle] = useState('Celdas de ejemplo');
+    const [mapTitle, setTitle] = useState('Sample cells');
     const [layout, setLayout] = useState<LayoutKind>('right');
     const [quality, setQuality] = useState<Quality>('normal');
     const [longLegend, setLongLegend] = useState(false);
@@ -60,12 +60,12 @@ function App() {
         page: { size: 'letter', orientation: 'landscape', dpi: QUALITY[quality] },
         layout,
         elements: [
-            title(mapTitle, { subtitle: 'Demo de cartela' }),
-            dateText({ locale: 'es-MX' }),
-            legend([{ heading: 'Clases' }, ...classEntries(longLegend), { label: 'Rampa', image: swatchImage() }], { title: 'Leyenda' }),
-            text('Fuente: datos sintéticos generados en el navegador.'),
+            title(mapTitle, { subtitle: 'cartela demo' }),
+            dateText({ locale: 'en-US' }),
+            legend([{ heading: 'Classes' }, ...classEntries(longLegend), { label: 'Ramp', image: swatchImage() }], { title: 'Legend' }),
+            text('Source: synthetic data generated in the browser.'),
             attribution({ prefix: '© ' }),
-            scaleBar({ ratio: true, locale: 'es-MX' }),
+            scaleBar({ ratio: true, locale: 'en-US' }),
             northArrow(),
             ...gridElements(gridKind),
             ...(withOverview ? [overviewMap({ layers: () => [cellsLayer(), routeLayer()], position: 'bottom-right' })] : []),
@@ -112,43 +112,43 @@ function App() {
                 {frame && <div className="guide" data-testid="guide" style={{ left: frame.x, top: frame.y, width: frame.width, height: frame.height }} />}
             </div>
             <aside className="side">
-                <label>Título<input type="text" value={mapTitle} onChange={e => setTitle(e.target.value)} /></label>
-                <label>Distribución
+                <label>Title<input type="text" value={mapTitle} onChange={e => setTitle(e.target.value)} /></label>
+                <label>Layout
                     <select value={layout} onChange={e => setLayout(e.target.value as LayoutKind)} data-testid="layout">
-                        <option value="right">Panel derecho</option>
-                        <option value="left">Panel izquierdo</option>
-                        <option value="bottom">Banda inferior</option>
-                        <option value="none">Solo mapa</option>
+                        <option value="right">Right panel</option>
+                        <option value="left">Left panel</option>
+                        <option value="bottom">Bottom band</option>
+                        <option value="none">Map only</option>
                     </select>
                 </label>
-                <label>Calidad
+                <label>Quality
                     <select value={quality} onChange={e => setQuality(e.target.value as Quality)} data-testid="quality">
                         {Object.entries(QUALITY).map(([key, dpi]) => <option key={key} value={key}>{`${key} · ${dpi} dpi`}</option>)}
                     </select>
                 </label>
-                <label>Retícula
+                <label>Graticule
                     <select value={gridKind} onChange={e => setGridKind(e.target.value as GridKind)} data-testid="grid">
-                        <option value="none">Ninguna</option>
-                        <option value="divisions">Divisiones</option>
+                        <option value="none">None</option>
+                        <option value="divisions">Divisions</option>
                         <option value="lonlat">Lon/lat</option>
                         <option value="utm">UTM</option>
                     </select>
                 </label>
-                <label className="check"><input type="checkbox" checked={withOverview} onChange={e => setWithOverview(e.target.checked)} data-testid="overview" />Minimapa</label>
-                <label className="check"><input type="checkbox" checked={longLegend} onChange={e => setLongLegend(e.target.checked)} data-testid="long" />Leyenda larga</label>
+                <label className="check"><input type="checkbox" checked={withOverview} onChange={e => setWithOverview(e.target.checked)} data-testid="overview" />Overview map</label>
+                <label className="check"><input type="checkbox" checked={longLegend} onChange={e => setLongLegend(e.target.checked)} data-testid="long" />Long legend</label>
                 <div className="row">
-                    <button type="button" onClick={() => job.run(options)} disabled={!map || running} data-testid="export">Exportar</button>
-                    {running && <button type="button" onClick={job.cancel}>Cancelar</button>}
+                    <button type="button" onClick={() => job.run(options)} disabled={!map || running} data-testid="export">Export</button>
+                    {running && <button type="button" onClick={job.cancel}>Cancel</button>}
                     <button type="button" onClick={() => download('png')} disabled={!job.sheet}>PNG</button>
                     <button type="button" onClick={() => download('pdf')} disabled={!job.sheet}>PDF</button>
                 </div>
                 <span className="status" data-testid="status">
                     {job.status}{job.progress ? ` · ${job.progress.phase} ${Math.round(job.progress.ratio * 100)}%` : ''}
-                    {job.sheet ? ` · ${job.sheet.pages.length} pág. · ${job.sheet.geometry.size.join('×')} px` : ''}
+                    {job.sheet ? ` · ${job.sheet.pages.length} pp. · ${job.sheet.geometry.size.join('×')} px` : ''}
                     {job.error ? ` · ${job.error.message}` : ''}
                 </span>
                 <VideoPanel map={map} />
-                <div className="pages">{urls.map(url => <img key={url} src={url} alt="Página exportada" />)}</div>
+                <div className="pages">{urls.map(url => <img key={url} src={url} alt="Exported page" />)}</div>
             </aside>
         </div>
     );

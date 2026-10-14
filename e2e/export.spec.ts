@@ -28,7 +28,7 @@ test('exports a sheet and restores the live map', async ({ page }) => {
     expect(info.restored).toBe(true);
     expect(info.pixelRatio).toBe(await page.evaluate(() => window.devicePixelRatio));
     expect(Math.abs((info.snapshot?.[0] ?? 0) - (info.frame?.[0] ?? 0))).toBeLessThanOrEqual(1);
-    expect(info.attributions).toContain('Datos sintéticos de cartela');
+    expect(info.attributions).toContain('Synthetic data by cartela');
     await expect(page.locator('canvas[data-cartela-freeze]')).toHaveCount(0);
     expect(await page.evaluate(() => window.cartela?.pdf())).toBe('%PDF-1.4');
 });

@@ -97,7 +97,7 @@ export function VideoPanel({ map }: { map: OlMap | null }) {
     }, [job.video, support, map]);
 
     const route = useMemo(() => routeLine(), []);
-    const elements = useMemo(() => [title('Recorrido de ejemplo', { slot: 'map' }), scaleBar({ locale: 'es-MX' }), northArrow({ position: 'top-right' }), attribution({ prefix: '© ', slot: 'map' })], []);
+    const elements = useMemo(() => [title('Sample route', { slot: 'map' }), scaleBar({ locale: 'en-US' }), northArrow({ position: 'top-right' }), attribution({ prefix: '© ', slot: 'map' })], []);
 
     const record = async (kind: 'route' | 'orbit') => {
         if (!map) return;
@@ -126,28 +126,28 @@ export function VideoPanel({ map }: { map: OlMap | null }) {
     const running = job.status === 'running';
     return (
         <section className="video">
-            <label>Formato
+            <label>Format
                 <select value={format} onChange={e => setFormat(e.target.value as VideoFormat)} data-testid="format">
                     {(Object.keys(LABELS) as VideoFormat[]).map(key => (
                         <option key={key} value={key} disabled={!support?.[key]}>{LABELS[key]}</option>
                     ))}
                 </select>
             </label>
-            <label>Segundos<input type="text" inputMode="numeric" value={seconds} onChange={e => setSeconds(Number(e.target.value) || 1)} data-testid="seconds" /></label>
-            {canPickFile() && <label className="check"><input type="checkbox" checked={toDisk} onChange={e => setToDisk(e.target.checked)} />Guardar directo a disco</label>}
+            <label>Seconds<input type="text" inputMode="numeric" value={seconds} onChange={e => setSeconds(Number(e.target.value) || 1)} data-testid="seconds" /></label>
+            {canPickFile() && <label className="check"><input type="checkbox" checked={toDisk} onChange={e => setToDisk(e.target.checked)} />Save straight to disk</label>}
             <div className="row">
-                <button type="button" onClick={() => record('route')} disabled={!map || !support || running} data-testid="record-route">Ruta</button>
-                <button type="button" onClick={() => record('orbit')} disabled={!map || !support || running} data-testid="record-orbit">Órbita</button>
-                {running && <button type="button" onClick={job.cancel}>Cancelar</button>}
+                <button type="button" onClick={() => record('route')} disabled={!map || !support || running} data-testid="record-route">Route</button>
+                <button type="button" onClick={() => record('orbit')} disabled={!map || !support || running} data-testid="record-orbit">Orbit</button>
+                {running && <button type="button" onClick={job.cancel}>Cancel</button>}
             </div>
             <span className="status" data-testid="video-status">
                 {job.status}{job.progress ? ` · ${job.progress.phase} ${Math.round(job.progress.ratio * 100)}%` : ''}
-                {job.video ? ` · ${job.video.frames} cuadros · ${job.video.size.join('×')} · ${job.video.extension}${job.video.blob ? '' : ' · en disco'}` : ''}
+                {job.video ? ` · ${job.video.frames} frames · ${job.video.size.join('×')} · ${job.video.extension}${job.video.blob ? '' : ' · on disk'}` : ''}
                 {job.error ? ` · ${job.error.message}` : ''}
                 {planError ? ` · ${planError}` : ''}
             </span>
             {url && job.video && (job.video.mimeType === 'image/gif'
-                ? <img src={url} alt="Animación grabada" />
+                ? <img src={url} alt="Recorded animation" />
                 : <video src={url} controls loop muted />)}
         </section>
     );
