@@ -218,6 +218,8 @@ if (video.blob) saveBlob(video.blob, `route${video.extension}`);
 |---|---|
 | Follow a `LineString` at constant ground speed, with `follow`, `rotate`, `zoom`, `hold` and `easing` | `planRoute` |
 | Orbit around a centre (`turns`, `direction`) | `planOrbit`, or any `FramePlan` of your own |
+| Hold the current view, for time-lapses of WMS layers | `planHold` |
+| Change the map before each frame (a date, a filter, a layer) | `beforeFrame` |
 | Deterministic recording: every frame waits for the map to finish rendering | `recordMap` |
 | Growing trail and heading marker over the route | `trail` |
 | Sheet elements over every frame; scale bar and north arrow follow the view | `elements` (`map` and `frame` slots) |
@@ -229,6 +231,21 @@ if (video.blob) saveBlob(video.blob, `route${video.extension}`);
 size is rounded to even numbers, and panel elements are rejected: use `slot: 'map'` for titles and
 text. `mediabunny` and `gifenc` are loaded with a dynamic `import()` only when a video is recorded;
 print-only apps never load them.
+
+### Animating dates
+
+With [zootropo](https://github.com/GHEgar/zootropo) driving a WMS layer, hold the view and move one
+step every few frames; `recordMap` waits for the tiles of each step before encoding it:
+
+```ts
+const keys = player.getSnapshot().sequence.keys;
+const plan = planHold(map, { fps: 10, frames: keys.length * 5 });
+const video = await recordMap(map, plan, {
+    encoder: gifEncoder(),
+    elements: [title(() => format.keys(player.getSnapshot().keys), { slot: 'map' })],
+    beforeFrame: (_, index) => player.seek(keys[Math.floor(index / 5)] ?? keys[0]),
+});
+```
 
 ### Writing to disk
 

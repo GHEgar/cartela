@@ -53,6 +53,7 @@ export interface RecordOptions {
     date?: Date;
     signal?: AbortSignal;
     onProgress?: (progress: Progress) => void;
+    beforeFrame?: (frame: FrameState, index: number) => void | Promise<void>;
 }
 
 export interface Video {

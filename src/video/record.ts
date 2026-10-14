@@ -60,6 +60,8 @@ export async function recordMap(map: OlMap, plan: FramePlan, options: RecordOpti
         let loaded = false;
         for (const [index, frame] of frames.entries()) {
             throwIfAborted(signal);
+            await options.beforeFrame?.(frame, index);
+            throwIfAborted(signal);
             trail?.update(frame);
             const snapshot = await session.render(frame, signal);
             const env: DrawEnv = createEnv(dpi, theme, snapshot, layout, date);

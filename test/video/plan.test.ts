@@ -4,6 +4,7 @@ import LineString from 'ol/geom/LineString.js';
 import { fromLonLat, toLonLat } from 'ol/proj.js';
 import { getDistance } from 'ol/sphere.js';
 import { measureRoute } from '../../src/video/measure.js';
+import { planHold } from '../../src/video/hold.js';
 import { planOrbit, recordingDefaults } from '../../src/video/orbit.js';
 import { planRoute, unwrap } from '../../src/video/route.js';
 
@@ -89,5 +90,20 @@ describe('recordingDefaults', () => {
     it('uses a small square for GIF and 720p for video', () => {
         expect(recordingDefaults('gif')).toEqual({ fps: 15, size: [480, 480] });
         expect(recordingDefaults('mp4')).toEqual({ fps: 30, size: [1280, 720] });
+    });
+});
+
+describe('planHold', () => {
+    it('repeats the current view for the requested frames', () => {
+        const plan = planHold(mapWith(view()), { fps: 12, frames: 36 });
+        expect(plan.fps).toBe(12);
+        expect(plan.frames).toHaveLength(36);
+        expect(new Set(plan.frames.map(frame => JSON.stringify(frame))).size).toBe(1);
+        expect(plan.frames[0]).not.toBe(plan.frames[1]);
+    });
+
+    it('takes the length from the duration by default', () => {
+        expect(planHold(mapWith(view()), { fps: 10 }).frames).toHaveLength(30);
+        expect(planHold(mapWith(view()), { fps: 10, duration: 1.5 }).frames).toHaveLength(15);
     });
 });

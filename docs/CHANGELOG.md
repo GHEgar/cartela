@@ -5,6 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+## [0.5.0] - 2026-10-14
+
+### Agregado
+
+- `planHold(map, { frames | duration, fps, size })`: repite la vista actual, para grabar cómo cambia
+  una capa sin mover la cámara (por ejemplo, las fechas de un WMS con zootropo).
+- `beforeFrame(frame, index)` en `recordMap`: cambia el mapa antes de cada cuadro; el cuadro espera a que
+  termine de dibujarse. Receta con zootropo en el README.
+
 ## [0.4.0] - 2026-10-13
 
 ### Agregado
