@@ -8,6 +8,8 @@ Headless print and video export for OpenLayers maps: sheet, legends, scale bar, 
 
 ![Sheets with a side panel, a bottom band, a UTM graticule, an overview map and a legend that overflows onto a second page, then a route video](.github/assets/demo.gif)
 
+**[Live demo](https://ghegar.github.io/cartela/)**
+
 cartela owns the render: it sizes a canvas for paper and DPI, draws the live
 [OpenLayers](https://openlayers.org) map straight into it, restores the map afterwards and composes
 the sheet around it — title, legend, scale bar, north arrow, grid, overview map, attributions. It also
