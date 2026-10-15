@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client';
 import OlMap from 'ol/Map.js';
 import View from 'ol/View.js';
 import 'ol/ol.css';
-import '@npmegar/rotulo';
+import 'rotulo';
 import {
     attribution, dateText, graticule, grid, legend, northArrow, overviewMap, QUALITY, saveBlob, scaleBar, text, title, toBlob, toPdf,
     type ExportOptions, type LayoutKind, type Quality, type Sheet,
