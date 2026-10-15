@@ -3,12 +3,13 @@ import { createRoot } from 'react-dom/client';
 import OlMap from 'ol/Map.js';
 import View from 'ol/View.js';
 import 'ol/ol.css';
+import '@npmegar/rotulo';
 import {
     attribution, dateText, graticule, grid, legend, northArrow, overviewMap, QUALITY, saveBlob, scaleBar, text, title, toBlob, toPdf,
     type ExportOptions, type LayoutKind, type Quality, type Sheet,
 } from 'cartela';
 import { useMapExport, usePrintFrame } from 'cartela/react';
-import { CENTER, cellsLayer, classEntries, routeLayer, swatchImage } from './data';
+import { CENTER, THEME, cellsLayer, classEntries, routeLayer, swatchImage } from './data';
 import { VideoPanel } from './video';
 
 declare global {
@@ -59,6 +60,7 @@ function App() {
     const options = useMemo<ExportOptions>(() => ({
         page: { size: 'letter', orientation: 'landscape', dpi: QUALITY[quality] },
         layout,
+        theme: THEME,
         elements: [
             title(mapTitle, { subtitle: 'cartela demo' }),
             dateText({ locale: 'en-US' }),

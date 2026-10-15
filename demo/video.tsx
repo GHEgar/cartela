@@ -6,7 +6,7 @@ import {
     type EncoderFactory, type FileChunk, type FramePlan, type Video, type VideoFormat, type VideoSupport, type VideoTarget,
 } from 'cartela/video';
 import { useMapVideo } from 'cartela/react';
-import { routeLine } from './data';
+import { routeLine, THEME } from './data';
 
 declare global {
     interface Window {
@@ -120,7 +120,7 @@ export function VideoPanel({ map }: { map: OlMap | null }) {
                 return;
             }
         }
-        job.record(plan, { encoder: encoderFor(format, target ?? undefined), elements, ...(kind === 'route' ? { trail: { route } } : {}) });
+        job.record(plan, { encoder: encoderFor(format, target ?? undefined), elements, theme: THEME, ...(kind === 'route' ? { trail: { route } } : {}) });
     };
 
     const running = job.status === 'running';

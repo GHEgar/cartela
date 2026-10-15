@@ -7,6 +7,8 @@ import { fromLonLat } from 'ol/proj.js';
 import { Fill, Stroke, Style } from 'ol/style.js';
 import type { SymbolEntry } from 'cartela';
 
+export const THEME = { fontFamily: 'Rotulo, system-ui, sans-serif' };
+
 export const CLASSES = ['#e8f1d6', '#bfdc9c', '#86c06c', '#4f9a4a', '#2a6b36'];
 
 const ORIGIN: [number, number] = [-103.6, 20.45];
