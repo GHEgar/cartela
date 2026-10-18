@@ -5,9 +5,15 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+### Agregado
+
+- `release.yml`: un tag `vX.Y.Z` corre las pruebas, crea el release con su sección del CHANGELOG y
+  publica en npm con procedencia y en GitHub Packages.
+
 ### Cambiado
 
 - El demo está en inglés.
+- El e2e levanta el demo en el puerto 5191.
 
 ## [0.5.0] - 2026-10-14
 

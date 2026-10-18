@@ -20,6 +20,10 @@
     "author": "Edgar Villarreal",
     "type": "module",
     "sideEffects": false,
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/GHEgar/cartela.git"
+    },
     "files": [
         "dist"
     ],
