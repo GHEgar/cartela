@@ -6,18 +6,9 @@ import VectorSource from 'ol/source/Vector.js';
 import { fromLonLat } from 'ol/proj.js';
 import { Fill, Stroke, Style } from 'ol/style.js';
 import type { SymbolEntry } from 'cartela';
+import { CLASSES, noise, ORIGIN, ROUTE, STEP } from './sample';
 
-export const THEME = { fontFamily: 'Rotulo, system-ui, sans-serif' };
-
-export const CLASSES = ['#e8f1d6', '#bfdc9c', '#86c06c', '#4f9a4a', '#2a6b36'];
-
-const ORIGIN: [number, number] = [-103.6, 20.45];
-const STEP = 0.05;
-
-function noise(i: number, j: number): number {
-    const value = Math.sin(i * 12.9898 + j * 78.233) * 43758.5453;
-    return value - Math.floor(value);
-}
+export { CLASSES, THEME } from './sample';
 
 export function cellsLayer(): VectorLayer {
     const features: Feature[] = [];
@@ -42,7 +33,7 @@ export function cellsLayer(): VectorLayer {
 }
 
 export function routeLine(): LineString {
-    return new LineString([[-103.55, 20.5], [-103.4, 20.62], [-103.25, 20.58], [-103.12, 20.8]].map(c => fromLonLat(c)));
+    return new LineString(ROUTE.map(c => fromLonLat(c)));
 }
 
 export function routeLayer(): VectorLayer {

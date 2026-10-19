@@ -20,6 +20,9 @@
             "cartela/video": [
                 "./src/video/index.ts"
             ],
+            "cartela/maplibre": [
+                "./src/maplibre/index.ts"
+            ],
             "cartela/react": [
                 "./src/react/index.ts"
             ],

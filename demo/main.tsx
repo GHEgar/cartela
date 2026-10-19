@@ -114,6 +114,7 @@ function App() {
                 {frame && <div className="guide" data-testid="guide" style={{ left: frame.x, top: frame.y, width: frame.width, height: frame.height }} />}
             </div>
             <aside className="side">
+                <a href="./maplibre.html">MapLibre demo</a>
                 <label>Title<input type="text" value={mapTitle} onChange={e => setTitle(e.target.value)} /></label>
                 <label>Layout
                     <select value={layout} onChange={e => setLayout(e.target.value as LayoutKind)} data-testid="layout">

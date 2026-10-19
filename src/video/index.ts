@@ -1,4 +1,5 @@
 export { recordMap, overlayDpi, MAX_FRAMES } from './record.js';
+export { recordFrames, type FramesPlan } from './frames.js';
 export { planRoute, DEFAULT_FPS, DEFAULT_SIZE, type RouteOptions } from './route.js';
 export { planOrbit, recordingDefaults, type OrbitOptions, type RecordingDefaults } from './orbit.js';
 export { planHold, type HoldOptions } from './hold.js';

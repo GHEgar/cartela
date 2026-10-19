@@ -1,4 +1,4 @@
-export { exportMap, previewMap, composeSheet, DEFAULT_MARGIN, PREVIEW_DPI } from './export.js';
+export { exportMap, previewMap, composeSheet, exportSheet, DEFAULT_MARGIN, PREVIEW_DPI } from './export.js';
 export { renderMap, resolveViewTarget, DEFAULT_TIMEOUT } from './render.js';
 export { openSession } from './session.js';
 export { printFrame, watchPrintFrame, sheetAspect, fitRect, DEFAULT_FRAME_PADDING } from './frame.js';

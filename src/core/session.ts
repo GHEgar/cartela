@@ -1,12 +1,12 @@
 import type OlMap from 'ol/Map.js';
 import type MapEvent from 'ol/MapEvent.js';
 import { collectAttributions, layerLabel } from './attributions.js';
-import { abortError, RenderTimeoutError, TaintedCanvasError, throwIfAborted } from './errors.js';
+import { abortError, DEFAULT_TIMEOUT, RenderTimeoutError, TaintedCanvasError, throwIfAborted } from './errors.js';
 import { freeze } from './freeze.js';
 import { rotatedExtent } from './geo.js';
 import type { MapSession, MapSnapshot, SessionOptions, Size, ViewState } from './types.js';
 
-export const DEFAULT_TIMEOUT = 30_000;
+export { DEFAULT_TIMEOUT };
 
 function waitForRender(map: OlMap, timeout: number, signal?: AbortSignal): Promise<void> {
     return new Promise((resolve, reject) => {

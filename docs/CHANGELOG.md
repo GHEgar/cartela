@@ -14,6 +14,16 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 - `ramp` se dibuja como barra en degradado con sus valores extremos; opción `format` para los números.
 - Tipos `LayerLegend`, `ClassesLegend`, `RampLegend`, `ImageUrlLegend`, `SymbolsLegend`,
   `LegendClassItem`, `LegendStopItem` y `LegendSymbolItem`.
+- `cartela/maplibre`: exportación desde un mapa de MapLibre, globo, terreno y pitch incluidos.
+  `captureMap` copia el recuadro de impresión al tamaño pedido subiendo el pixel ratio del mapa y
+  leyendo el canvas en `idle`, sin `preserveDrawingBuffer`; `exportMap`, `previewMap` y `printFrame`
+  arman la hoja del core con esa captura; `planOrbit`, `planRoute` (sobre `[lng, lat][]`) y
+  `planHold` planean la cámara, y `recordMap` la graba con los encoders de `cartela/video`.
+  `overlays` agrega canvases encima, como el de deck.gl superpuesto. No carga `maplibre-gl` ni
+  OpenLayers en tiempo de ejecución; `maplibre-gl >= 6` es peer opcional.
+- `exportSheet(capture, options)` en el core, para armar la hoja desde cualquier motor, y
+  `recordFrames(open, plan, options)` en `cartela/video`, para grabar desde cualquier fuente de cuadros.
+- Demo con una página de MapLibre: columnas 3D, pitch, globo, hoja y órbita.
 - `release.yml`: un tag `vX.Y.Z` corre las pruebas, crea el release con su sección del CHANGELOG y
   publica en npm con procedencia y en GitHub Packages.
 

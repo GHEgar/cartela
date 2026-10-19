@@ -3,6 +3,7 @@ import type LineString from 'ol/geom/LineString.js';
 import { getCenter } from 'ol/extent.js';
 import { fitResolution } from '../core/geo.js';
 import type { Size } from '../core/types.js';
+import { DEFAULT_FPS, DEFAULT_SIZE } from './defaults.js';
 import { measureRoute } from './measure.js';
 import type { FramePlan, FrameState } from './types.js';
 
@@ -19,8 +20,7 @@ export interface RouteOptions {
     easing?: (t: number) => number;
 }
 
-export const DEFAULT_FPS = 30;
-export const DEFAULT_SIZE: Size = [1280, 720];
+export { DEFAULT_FPS, DEFAULT_SIZE };
 
 export function unwrap(angle: number, previous: number): number {
     const turn = 2 * Math.PI;

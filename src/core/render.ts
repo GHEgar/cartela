@@ -1,7 +1,7 @@
 import type OlMap from 'ol/Map.js';
 import { getCenter } from 'ol/extent.js';
 import { throwIfAborted } from './errors.js';
-import { fitRect } from './frame.js';
+import { fitRect } from './aspect.js';
 import { fitResolution } from './geo.js';
 import { DEFAULT_TIMEOUT, openSession } from './session.js';
 import type { MapSnapshot, RenderMapOptions, Size, ViewState } from './types.js';

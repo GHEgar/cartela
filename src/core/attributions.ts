@@ -1,18 +1,8 @@
 import { inView } from 'ol/layer/Layer.js';
 import type { FrameState } from 'ol/Map.js';
+import { plainText } from './plain-text.js';
 
-const ENTITIES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ', copy: '©' };
-
-export function plainText(html: string): string {
-    return html
-        .replace(/<[^>]*>/g, '')
-        .replace(/&(#\d+|[a-z]+);/gi, (entity, name: string) => {
-            if (name.startsWith('#')) return String.fromCodePoint(Number(name.slice(1)));
-            return ENTITIES[name.toLowerCase()] ?? entity;
-        })
-        .replace(/\s+/g, ' ')
-        .trim();
-}
+export { plainText } from './plain-text.js';
 
 export function collectAttributions(frameState: FrameState, into: Set<string>): void {
     for (const state of frameState.layerStatesArray) {

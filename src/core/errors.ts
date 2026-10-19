@@ -1,3 +1,5 @@
+export const DEFAULT_TIMEOUT = 30_000;
+
 export class CartelaError extends Error {
     constructor(message: string) {
         super(message);

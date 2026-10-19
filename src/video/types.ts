@@ -1,5 +1,5 @@
 import type LineString from 'ol/geom/LineString.js';
-import type { Progress, SheetElement, Size, Theme, ViewState } from '../core/types.js';
+import type { MapSnapshot, Progress, SheetElement, Size, Theme, ViewState } from '../core/types.js';
 
 export type VideoFormat = 'mp4' | 'webm' | 'gif';
 
@@ -41,19 +41,33 @@ export interface TrailOptions {
     marker?: boolean;
 }
 
-export interface RecordOptions {
+export interface Plan<F> {
+    fps: number;
+    size: Size;
+    frames: F[];
+}
+
+export interface FrameSource<F> {
+    render: (frame: F, signal?: AbortSignal) => Promise<MapSnapshot>;
+    close: () => void;
+}
+
+export interface FrameRecordOptions<F> {
     encoder: EncoderFactory;
     elements?: SheetElement[];
     theme?: Partial<Theme>;
-    trail?: TrailOptions;
     dpi?: number;
-    timeout?: number;
-    freeze?: boolean;
     maxFrames?: number;
     date?: Date;
     signal?: AbortSignal;
     onProgress?: (progress: Progress) => void;
-    beforeFrame?: (frame: FrameState, index: number) => void | Promise<void>;
+    beforeFrame?: (frame: F, index: number) => void | Promise<void>;
+}
+
+export interface RecordOptions extends FrameRecordOptions<FrameState> {
+    trail?: TrailOptions;
+    timeout?: number;
+    freeze?: boolean;
 }
 
 export interface Video {

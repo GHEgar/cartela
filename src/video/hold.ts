@@ -1,7 +1,7 @@
 import type OlMap from 'ol/Map.js';
 import type { Coordinate } from 'ol/coordinate.js';
 import type { Size } from '../core/types.js';
-import { DEFAULT_FPS, DEFAULT_SIZE } from './route.js';
+import { DEFAULT_FPS, DEFAULT_SIZE } from './defaults.js';
 import type { FramePlan, FrameState } from './types.js';
 
 export interface HoldOptions {

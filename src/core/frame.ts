@@ -1,37 +1,9 @@
 import type OlMap from 'ol/Map.js';
 import { unByKey } from 'ol/Observable.js';
-import { computeLayout, reserveOf, resolveLayout } from './layout.js';
-import { resolveTheme } from './theme.js';
-import { CSS_DPI, pageGeometry } from './units.js';
-import type { Box, ExportOptions, Size } from './types.js';
+import { fitRect, sheetAspect } from './aspect.js';
+import type { Box, ExportOptions } from './types.js';
 
-export const DEFAULT_FRAME_PADDING = 24;
-
-export function fitRect(container: Size, aspect: number, padding = DEFAULT_FRAME_PADDING): Box {
-    const availableWidth = Math.max(1, container[0] - padding * 2);
-    const availableHeight = Math.max(1, container[1] - padding * 2);
-    const width = Math.min(availableWidth, availableHeight * aspect);
-    const height = width / aspect;
-    return {
-        x: (container[0] - width) / 2,
-        y: (container[1] - height) / 2,
-        width,
-        height,
-    };
-}
-
-export function sheetAspect(options: ExportOptions = {}): number {
-    const theme = resolveTheme(options.theme);
-    const geometry = pageGeometry({ ...options.page, dpi: CSS_DPI }, Number.POSITIVE_INFINITY);
-    const layout = computeLayout(
-        geometry.size,
-        CSS_DPI,
-        options.page?.margin ?? 8,
-        resolveLayout(options.layout),
-        reserveOf(options.elements ?? [], theme),
-    );
-    return layout.frame.width / layout.frame.height;
-}
+export { fitRect, sheetAspect, DEFAULT_FRAME_PADDING } from './aspect.js';
 
 export function printFrame(map: OlMap, options: ExportOptions = {}): Box | null {
     const size = map.getSize();

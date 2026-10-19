@@ -4,7 +4,7 @@
 [![size](https://img.shields.io/bundlejs/size/cartela)](https://bundlejs.com/?q=cartela)
 [![license](https://img.shields.io/github/license/GHEgar/cartela)](LICENSE)
 
-Headless print and video export for OpenLayers maps: sheet, legends, scale bar, graticule, PNG, PDF, MP4 and GIF.
+Headless print and video export for OpenLayers and MapLibre maps: sheet, legends, scale bar, graticule, PNG, PDF, MP4 and GIF.
 
 ![Sheets with a side panel, a bottom band, a UTM graticule, an overview map and a legend that overflows onto a second page, then a route video](.github/assets/demo.gif)
 
@@ -26,6 +26,7 @@ npm install cartela ol
 |---|---|---|
 | `cartela` | Framework-free core: render, sheet layout, elements, preview, print frame, PNG and PDF | `ol >= 10` |
 | `cartela/video` | Frame plans, recording, trail and encoders for MP4, WebM and GIF | `mediabunny >= 1.61`, `gifenc >= 1.0.3` |
+| `cartela/maplibre` | Capture, sheet export and camera videos for a MapLibre map, globe and 3D included | `maplibre-gl >= 6` |
 | `cartela/react` | `useMapExport`, `usePrintFrame` and `useMapVideo` | `react >= 19` |
 
 ## Quick start
@@ -202,6 +203,43 @@ const video = await recordMap(map, plan, {
 });
 ```
 
+## MapLibre
+
+`cartela/maplibre` takes a MapLibre map instead of an OpenLayers one. The sheet, its elements, PNG, PDF
+and the video encoders are the same.
+
+```ts
+import { attribution, legend, northArrow, scaleBar, title, toPdf } from 'cartela';
+import { exportMap, planOrbit, printFrame, recordMap } from 'cartela/maplibre';
+import { videoEncoder } from 'cartela/video';
+
+const sheet = await exportMap(map, {
+    page: { size: 'a4', dpi: 200 },
+    elements: [title('Crimes 2025'), legend(entries), scaleBar(), northArrow(), attribution()],
+});
+const pdf = await toPdf(sheet);
+
+const video = await recordMap(map, planOrbit(map, { duration: 8, pitch: 60 }), { encoder: videoEncoder() });
+```
+
+It captures what the map shows inside the print frame — globe, terrain, pitch, sky and deck.gl layers
+in interleaved mode — by raising the map pixel ratio for a moment and copying the canvas when the map
+goes `idle`, so `preserveDrawingBuffer` is not needed. A frozen image covers the map meanwhile.
+
+| Function | Gives |
+|---|---|
+| `exportMap`, `previewMap` | The sheet, as in the core; `camera` sets the view for the capture only, `padding` the frame margin |
+| `printFrame` | The on-screen rectangle that will be printed |
+| `captureMap(map, { size, pixelRatio })` | A bare snapshot, with the `camera` it was taken at |
+| `planOrbit`, `planRoute`, `planHold` | Camera plans: centre, zoom, bearing and pitch per frame. `planRoute` takes `[lng, lat][]` |
+| `recordMap(map, plan, options)` | The video, with the options of `cartela/video` except `trail` |
+| `overlays` | A function returning extra canvases to draw on top, such as an overlaid deck.gl canvas (created with `preserveDrawingBuffer`) |
+
+MapLibre caps the canvas at `maxCanvasSize` (4096² by default); above it the capture is upscaled, so
+raise it on the map to print at high DPI. The scale bar measures at the centre of the view, and with
+pitch or the globe the graticule, grid and overview map footprint are approximate. The entry imports
+neither `maplibre-gl` nor OpenLayers at runtime.
+
 ## React
 
 ```tsx
@@ -251,7 +289,8 @@ npm run e2e
 
 The demo runs without network on synthetic cells and a route: layouts, quality presets, grid,
 lon/lat and UTM graticules, overview map, a long legend that overflows, the print frame guide, PNG and
-PDF downloads, and route or orbit recordings in MP4, WebM or GIF, optionally straight to disk.
+PDF downloads, and route or orbit recordings in MP4, WebM or GIF, optionally straight to disk. A second
+page does the same on MapLibre with 3D columns, pitch and the globe.
 
 ## Contributing
 

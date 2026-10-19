@@ -112,15 +112,26 @@ export interface Progress {
     ratio: number;
 }
 
-export interface ExportOptions extends MapRenderOptions {
+export interface SheetOptions {
     page?: PageOptions;
     layout?: LayoutKind | LayoutOptions;
     elements?: SheetElement[];
     theme?: Partial<Theme>;
     maxPixels?: number;
     date?: Date;
+    signal?: AbortSignal;
     onProgress?: (progress: Progress) => void;
 }
+
+export interface ExportOptions extends SheetOptions, MapRenderOptions {}
+
+export interface CaptureRequest {
+    size: Size;
+    pixelRatio: number;
+    aspect: number;
+}
+
+export type Capture = (request: CaptureRequest) => Promise<MapSnapshot>;
 
 export interface PageGeometry {
     size: Size;
