@@ -29,4 +29,14 @@ export {
     type ImageEntry,
     type WmsEntry,
 } from './elements/legend-entries.js';
+export type {
+    LayerLegend,
+    ClassesLegend,
+    RampLegend,
+    ImageUrlLegend,
+    SymbolsLegend,
+    LegendClassItem,
+    LegendStopItem,
+    LegendSymbolItem,
+} from './elements/legend-layer.js';
 export type * from './types.js';

@@ -2,6 +2,7 @@ import type OlMap from 'ol/Map.js';
 import { imageSize, loadImage } from './draw.js';
 import { layerLabel } from '../attributions.js';
 import type { DrawEnv } from '../types.js';
+import { layerParts, type HistogramBar, type LayerLegend, type LegendStopItem } from './legend-layer.js';
 
 export interface LegendSource {
     getLegendUrl(resolution?: number, params?: Record<string, unknown>): string | undefined;
@@ -32,11 +33,13 @@ export interface WmsEntry {
     scale?: number;
 }
 
-export type LegendEntry = HeadingEntry | SymbolEntry | ImageEntry | WmsEntry;
+export type LegendEntry = HeadingEntry | SymbolEntry | ImageEntry | WmsEntry | LayerLegend;
 
 export type ResolvedEntry =
     | { kind: 'heading'; text: string }
     | { kind: 'symbol'; entry: SymbolEntry }
+    | { kind: 'histogram'; bars: HistogramBar[] }
+    | { kind: 'ramp'; stops: LegendStopItem[] }
     | { kind: 'image'; label?: string; source: CanvasImageSource; size: [number, number]; scale: number };
 
 function isWmsSource(value: unknown): value is LegendSource {
@@ -52,7 +55,12 @@ export function wmsLegends(map: OlMap, params: Record<string, unknown> = {}, sca
         });
 }
 
-async function resolveOne(entry: LegendEntry, env: DrawEnv, signal?: AbortSignal): Promise<ResolvedEntry | null> {
+async function resolveOne(entry: LegendEntry, env: DrawEnv, signal?: AbortSignal, histogram = false): Promise<ResolvedEntry[] | ResolvedEntry | null> {
+    if ('kind' in entry) {
+        if (entry.kind !== 'image') return layerParts(entry, histogram);
+        const image = await loadImage(entry.url, signal).catch(() => null);
+        return image ? { kind: 'image', label: entry.title, source: image, size: imageSize(image), scale: 1 } : null;
+    }
     if ('heading' in entry) return { kind: 'heading', text: entry.heading };
     if ('source' in entry) {
         const params = entry.layer ? { LAYER: entry.layer, ...entry.params } : { ...entry.params };
@@ -74,7 +82,7 @@ function withLabel(entry: Extract<ResolvedEntry, { kind: 'image' }>, label: stri
     return label === undefined ? entry : { ...entry, label };
 }
 
-export async function resolveEntries(entries: readonly LegendEntry[], env: DrawEnv, signal?: AbortSignal): Promise<ResolvedEntry[]> {
-    const resolved = await Promise.all(entries.map(entry => resolveOne(entry, env, signal)));
-    return resolved.filter((entry): entry is ResolvedEntry => entry !== null);
+export async function resolveEntries(entries: readonly LegendEntry[], env: DrawEnv, signal?: AbortSignal, histogram = false): Promise<ResolvedEntry[]> {
+    const resolved = await Promise.all(entries.map(entry => resolveOne(entry, env, signal, histogram)));
+    return resolved.flatMap(entry => (entry === null ? [] : Array.isArray(entry) ? entry : [entry]));
 }

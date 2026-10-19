@@ -7,6 +7,13 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ### Agregado
 
+- `legend` acepta entradas de leyenda por capa con `kind` (`classes`, `ramp`, `image` y `symbols`, con
+  `layerId` y `title`), además de las que ya aceptaba: cada una lleva su título como encabezado.
+- Opción `histogram` de `legend` (y por entrada): las clases con `count` se dibujan como histograma de
+  barras horizontales con el conteo al lado.
+- `ramp` se dibuja como barra en degradado con sus valores extremos; opción `format` para los números.
+- Tipos `LayerLegend`, `ClassesLegend`, `RampLegend`, `ImageUrlLegend`, `SymbolsLegend`,
+  `LegendClassItem`, `LegendStopItem` y `LegendSymbolItem`.
 - `release.yml`: un tag `vX.Y.Z` corre las pruebas, crea el release con su sección del CHANGELOG y
   publica en npm con procedencia y en GitHub Packages.
 

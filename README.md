@@ -97,6 +97,25 @@ Text content can be a function of the draw environment. `position` takes `top-le
 | `graticule` | Lines at round values in lon/lat, UTM or any projection registered in OpenLayers, labelled where they cross the edge. It samples the border, so it stays correct with a rotated view. UTM uses the Krüger series on WGS 84 without proj4; `toUtm`, `fromUtm` and `utmZone` are exported |
 | `overviewMap` | A second map with the frame footprint. `layers` is a factory because a layer cannot live in two maps; `extent` fixes the area (default: `factor` times the frame) and `footprint` styles the rectangle. In a video it renders once |
 
+### Layer legends
+
+`legend` also takes plain legend data with a `kind`, the shape a layer manager can produce without
+depending on cartela:
+
+```ts
+legend([
+    { kind: 'classes', layerId: 'hex', title: 'Crimes', classes: [{ label: '0 – 10', color: '#fde8d0', count: 42 }] },
+    { kind: 'ramp', layerId: 'ndvi', title: 'NDVI', stops: [{ value: -1, color: '#a50026' }, { value: 1, color: '#006837' }] },
+    { kind: 'image', layerId: 'rivers', title: 'Rivers', url: legendUrl },
+    { kind: 'symbols', layerId: 'roads', title: 'Roads', items: [{ label: 'Highway', color: '#333', shape: 'line' }] },
+], { histogram: true, format: v => v.toLocaleString('en') });
+```
+
+Each one gets its `title` as a heading. `classes` draw as color boxes, or with `histogram: true` (or
+`histogram` on the entry) as bars proportional to `count` with the count beside them. `ramp` draws a
+gradient bar with its end values (`format` formats them), `image` loads `url` like a WMS legend, and
+`symbols` maps `point`, `line` and `fill` to circle, line and box.
+
 ### Custom elements
 
 Anything that implements `SheetElement` goes on the sheet: `measure` gives the height in a panel,

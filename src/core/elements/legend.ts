@@ -1,11 +1,14 @@
 import { CSS_DPI } from '../units.js';
 import { drawText, measureText } from './draw.js';
 import { resolveEntries, type LegendEntry, type ResolvedEntry } from './legend-entries.js';
+import { drawHistogram, drawRamp, formatValue, histogramHeight, rampHeight, type ValueFormat } from './legend-graphics.js';
 import type { Box, DrawEnv, SheetElement } from '../types.js';
 
 export interface LegendOptions {
     title?: string;
     symbolSize?: number;
+    histogram?: boolean;
+    format?: ValueFormat;
 }
 
 interface Placed {
@@ -28,6 +31,8 @@ function imageDimensions(entry: Extract<ResolvedEntry, { kind: 'image' }>, env: 
 function entryHeight(ctx: CanvasRenderingContext2D, entry: ResolvedEntry, width: number, env: DrawEnv, symbol: number): number {
     const { theme } = env;
     if (entry.kind === 'heading') return measureText(ctx, entry.text, width, { size: theme.fontSize, weight: '700' }, env);
+    if (entry.kind === 'histogram') return histogramHeight(ctx, entry.bars, width, env, symbol);
+    if (entry.kind === 'ramp') return rampHeight(env, symbol);
     if (entry.kind === 'symbol') {
         const label = measureText(ctx, entry.entry.label, width - symbol - env.mm(2), { size: theme.fontSize }, env);
         return Math.max(symbol, label);
@@ -59,8 +64,16 @@ function drawSymbol(ctx: CanvasRenderingContext2D, entry: ResolvedEntry & { kind
     drawText(ctx, entry.entry.label, { ...box, x: box.x + size + env.mm(2), width: box.width - size - env.mm(2) }, { size: env.theme.fontSize }, env);
 }
 
-function drawEntry(ctx: CanvasRenderingContext2D, placed: Placed, box: Box, env: DrawEnv, symbol: number): void {
+function drawEntry(ctx: CanvasRenderingContext2D, placed: Placed, box: Box, env: DrawEnv, symbol: number, format: ValueFormat): void {
     const { entry } = placed;
+    if (entry.kind === 'histogram') {
+        drawHistogram(ctx, entry.bars, box, env, symbol);
+        return;
+    }
+    if (entry.kind === 'ramp') {
+        drawRamp(ctx, entry.stops, box, env, symbol, format);
+        return;
+    }
     if (entry.kind === 'heading') {
         drawText(ctx, entry.text, box, { size: env.theme.fontSize, weight: '700' }, env);
         return;
@@ -106,7 +119,7 @@ function legendPart(entries: ResolvedEntry[], options: LegendOptions, heading: b
                 const keep = entry.kind === 'heading' && next ? gap + entryHeight(ctx, next, box.width, env, symbol) : 0;
                 if (height + keep > room && index > 0) break;
                 const shrink = height > room && entry.kind === 'image' ? room / height : 1;
-                drawEntry(ctx, { entry, height, shrink }, { ...box, y, height: height * shrink }, env, symbol);
+                drawEntry(ctx, { entry, height, shrink }, { ...box, y, height: height * shrink }, env, symbol, options.format ?? formatValue);
                 y += height * shrink + gap;
             }
             const rest = entries.slice(index);
@@ -122,7 +135,7 @@ export function legend(entries: readonly LegendEntry[], options: LegendOptions =
         slot: 'panel',
         grow: true,
         load: async (env, signal) => {
-            resolved = await resolveEntries(entries, env, signal);
+            resolved = await resolveEntries(entries, env, signal, options.histogram ?? false);
         },
         measure: (ctx, width, env) => naturalHeight(ctx, resolved, options, true, width, env),
         draw: (ctx, box, env) => part().draw(ctx, box, env),
