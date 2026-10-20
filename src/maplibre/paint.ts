@@ -7,6 +7,7 @@ export function repaint<T>(
     timeout: number,
     signal: AbortSignal | undefined,
     onPaint: () => T,
+    onTimeout?: () => T,
 ): Promise<T> {
     throwIfAborted(signal);
     return new Promise((resolve, reject) => {
@@ -19,17 +20,18 @@ export function repaint<T>(
             detach();
             reject(error instanceof Error ? error : new Error(String(error)));
         };
-        const onEvent = (): void => {
+        const settle = (paint: () => T): void => {
             try {
-                const value = onPaint();
+                const value = paint();
                 detach();
                 resolve(value);
             } catch (error) {
                 fail(error);
             }
         };
+        const onEvent = (): void => settle(onPaint);
         const onAbort = (): void => fail(abortError(signal));
-        const timer = setTimeout(() => fail(new RenderTimeoutError(timeout)), timeout);
+        const timer = setTimeout(() => (onTimeout ? settle(onTimeout) : fail(new RenderTimeoutError(timeout))), timeout);
         map.on(type, onEvent);
         signal?.addEventListener('abort', onAbort, { once: true });
         map.triggerRepaint();

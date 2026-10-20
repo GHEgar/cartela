@@ -19,7 +19,7 @@ export function resolveViewTarget(map: OlMap, size: Size, options: RenderMapOpti
     const fit = options.fit ?? 'contain';
 
     if (extent === 'frame') {
-        const rect = fitRect(screen, options.aspect ?? size[0] / size[1], options.padding);
+        const rect = fitRect(screen, options.aspect ?? size[0] / size[1], options.padding, options.inset);
         const pixel = [rect.x + rect.width / 2, rect.y + rect.height / 2];
         return {
             center: map.getCoordinateFromPixel(pixel) ?? center,
@@ -51,6 +51,7 @@ export async function renderMap(map: OlMap, options: RenderMapOptions): Promise<
         pixelRatio: options.pixelRatio ?? 1,
         freeze: options.freeze !== false,
         timeout: options.timeout ?? DEFAULT_TIMEOUT,
+        ...(options.onTimeout ? { onTimeout: options.onTimeout } : {}),
     });
     try {
         return await session.render(goal, options.signal);

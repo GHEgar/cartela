@@ -1,4 +1,5 @@
-export { captureMap, openCapture, type CaptureSession, type CaptureFrame } from './capture.js';
+export { captureMap, openCapture, pendingSources, type CaptureSession, type CaptureFrame } from './capture.js';
+export { addTrail, TRAIL_ID, type MaplibreTrail } from './trail.js';
 export { exportMap, previewMap, printFrame } from './export.js';
 export { recordMap } from './record.js';
 export { planOrbit, planHold, type OrbitOptions, type HoldOptions } from './plans.js';

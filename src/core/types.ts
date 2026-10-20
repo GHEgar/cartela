@@ -56,12 +56,16 @@ export type ExtentMode =
     | Extent
     | { center: Coordinate; resolution: number };
 
+export type TimeoutMode = 'error' | 'capture';
+
 export interface MapRenderOptions {
     extent?: ExtentMode;
     fit?: 'contain' | 'cover';
     padding?: number;
+    inset?: Partial<Insets>;
     rotation?: number;
     timeout?: number;
+    onTimeout?: TimeoutMode;
     freeze?: boolean;
     signal?: AbortSignal;
 }
@@ -82,6 +86,7 @@ export interface MapSnapshot {
     projection: ProjectionLike;
     extent: Extent;
     attributions: string[];
+    pending?: string[];
 }
 
 export interface ViewState {
@@ -95,6 +100,7 @@ export interface SessionOptions {
     pixelRatio?: number;
     freeze?: boolean;
     timeout?: number;
+    onTimeout?: TimeoutMode;
 }
 
 export interface MapSession {

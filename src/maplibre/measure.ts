@@ -22,6 +22,7 @@ export function initialBearing(a: LngLat, b: LngLat): number {
 export interface LngLatMeasure {
     readonly length: number;
     pointAt: (distance: number) => LngLat;
+    slice: (distance: number) => LngLat[];
     headingAt: (distance: number, window: number) => number;
 }
 
@@ -68,5 +69,10 @@ export function measureLine(coordinates: readonly LngLat[]): LngLatMeasure {
         return initialBearing(a, b);
     };
 
-    return { length, pointAt, headingAt };
+    const slice = (distance: number): LngLat[] => {
+        const s = Math.min(length, Math.max(0, distance));
+        return [...points.slice(0, segment(s) + 1), pointAt(s)];
+    };
+
+    return { length, pointAt, slice, headingAt };
 }

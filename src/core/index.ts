@@ -9,6 +9,7 @@ export { PAPER, QUALITY, pageGeometry, paperSize, mmToPx, ptToPx, type Quality }
 export { DEFAULT_THEME, resolveTheme } from './theme.js';
 export { CartelaError, TaintedCanvasError, RenderTimeoutError, UnsupportedFormatError } from './errors.js';
 export { createEnv } from './env.js';
+export { cssColor } from './color.js';
 export { formatDegrees, formatDistance, niceStep, coordinateToPixel, pixelToCoordinate } from './geo.js';
 export { title, text, dateText, type TextOptions, type TitleOptions, type DateOptions, type TextContent, type Placement } from './elements/text.js';
 export { image, type ImageOptions } from './elements/image.js';

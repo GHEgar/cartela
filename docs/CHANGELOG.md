@@ -5,7 +5,25 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 ## [No publicado]
 
+## [0.6.0] - 2026-10-19
+
 ### Agregado
+
+- Opción `onTimeout: 'capture'` en `exportMap`, `renderMap`, `captureMap` y `recordMap` (OpenLayers y
+  MapLibre): al vencer `timeout` se captura lo que haya y `snapshot.pending` lista las fuentes que no
+  terminaron. Con `'error'` (por omisión) `RenderTimeoutError` trae `pending` y las nombra en el
+  mensaje: en MapLibre, las fuentes del estilo que no han cargado; en OpenLayers, las capas con
+  teselas, imágenes o features en vuelo.
+- `trail` en `recordMap` de `cartela/maplibre`: la traza crece con `along` sobre `[lng, lat][]`, con
+  halo y un punto en la posición actual, como capas `line` y `circle` del propio mapa que se quitan al
+  terminar. `addTrail` y `TRAIL_ID` exportados; `measureLine` suma `slice(distancia)`.
+- `inset` (`{ top, right, bottom, left }` en píxeles) en `printFrame`, `watchPrintFrame`,
+  `usePrintFrame`, `exportMap`, `captureMap` y `recordMap`: el recuadro se centra en el área que
+  queda libre, por ejemplo junto a un panel. `fitRect` acepta `inset` como cuarto argumento.
+- `cssColor(color, scope?)` resuelve colores con `var(--…)` a través del CSS calculado; `legend` lo
+  aplica a clases, rampas y símbolos (el canvas no entiende variables), con `colorScope` para
+  variables definidas en un contenedor.
+- `pendingSources(map)` en `cartela/maplibre`.
 
 - `legend` acepta entradas de leyenda por capa con `kind` (`classes`, `ramp`, `image` y `symbols`, con
   `layerId` y `title`), además de las que ya aceptaba: cada una lleva su título como encabezado.
@@ -31,6 +49,11 @@ Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y 
 
 - El demo está en inglés.
 - El e2e levanta el demo en el puerto 5191.
+- Las capturas de un mismo mapa de MapLibre (`openCapture`, `captureMap`, `exportMap`, `recordMap`)
+  hacen fila: una segunda captura espera a que cierre la primera en lugar de pisarle el pixel ratio,
+  y un `signal` la cancela mientras espera.
+- `beforeFrame` puede devolver cualquier valor o promesa (por ejemplo `player.seek(clave)` de
+  zootropo, que resuelve en `boolean`); se espera igual.
 
 ## [0.5.0] - 2026-10-14
 

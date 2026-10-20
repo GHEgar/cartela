@@ -46,6 +46,7 @@ export interface SnapshotInput {
     pixelRatio: number;
     cssWidth: number;
     attributions: string[];
+    pending?: string[];
 }
 
 export function snapshotOf(input: SnapshotInput): MaplibreSnapshot {
@@ -63,6 +64,7 @@ export function snapshotOf(input: SnapshotInput): MaplibreSnapshot {
         projection: 'EPSG:3857',
         extent: rotatedExtent(center, resolution, rotation, size),
         attributions: input.attributions,
+        ...(input.pending ? { pending: input.pending } : {}),
         camera,
     };
 }

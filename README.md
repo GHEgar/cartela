@@ -60,6 +60,8 @@ saveBlob(await toPdf(sheet, { title: 'Population 2020' }), 'map.pdf');
 | `maxPixels` | Pixel budget of the page (4096² by default); a larger request lowers the DPI and reports `geometry.clamped` |
 | `theme` | Font family and sizes in points, colours, frame width and gap in mm. The default theme is neutral |
 | `extent` | What goes inside the frame: `'frame'` (default, the print frame on screen), `'view'`, an `Extent` or `{ center, resolution }` |
+| `padding`, `inset` | Screen pixels around the print frame; `inset` (`{ top, right, bottom, left }`) keeps it clear of a panel over the map |
+| `timeout`, `onTimeout` | How long to wait for the map to finish rendering (30 s); then `'error'` (default) throws, `'capture'` keeps what is drawn |
 | `fit`, `rotation` | `contain` or `cover`; `rotation` overrides the view |
 | `freeze` | While the map renders off-screen the page shows a frozen image of it (`true` by default) |
 
@@ -117,6 +119,10 @@ Each one gets its `title` as a heading. `classes` draw as color boxes, or with `
 gradient bar with its end values (`format` formats them), `image` loads `url` like a WMS legend, and
 `symbols` maps `point`, `line` and `fill` to circle, line and box.
 
+The canvas does not understand CSS custom properties, so colors with `var(--…)` are resolved through
+the computed style before drawing (`cssColor(color, scope)` does it on its own). Variables defined on
+a container instead of `:root` need `colorScope: element`.
+
 ### Custom elements
 
 Anything that implements `SheetElement` goes on the sheet: `measure` gives the height in a panel,
@@ -132,7 +138,9 @@ const stop = watchPrintFrame(map, { page: { size: 'a4' } }, frame => setGuide(fr
 ```
 
 `previewMap` runs the same pipeline at 60 DPI. `printFrame` returns the on-screen rectangle that will
-be printed and `watchPrintFrame` keeps it updated; you draw the guide.
+be printed and `watchPrintFrame` keeps it updated; you draw the guide. With a panel over part of the
+map, pass `inset: { left: panelWidth }` to both the frame and the export so the frame is centred in
+the free area.
 
 ## Output
 
@@ -145,7 +153,10 @@ be printed and `watchPrintFrame` keeps it updated; you draw the guide.
 
 `exportMap` takes a `signal` to cancel and `onProgress`, which reports the phase (`layout`, `render`,
 `load`, `compose`, `encode`) and a ratio. Errors are typed: `TaintedCanvasError` (with the suspect
-layers), `RenderTimeoutError` and `UnsupportedFormatError`, all subclasses of `CartelaError`.
+layers), `RenderTimeoutError` (with `pending`, the layers or sources still loading) and
+`UnsupportedFormatError`, all subclasses of `CartelaError`. With `onTimeout: 'capture'` a slow layer
+does not fail the export: the map is taken as it is and `sheet.snapshot.pending` names what was
+missing.
 
 ## Video
 
@@ -203,6 +214,9 @@ const video = await recordMap(map, plan, {
 });
 ```
 
+`beforeFrame` may return a promise; the frame waits for it, so `player.seek` (which resolves once the
+step has loaded) can drive the dates.
+
 ## MapLibre
 
 `cartela/maplibre` takes a MapLibre map instead of an OpenLayers one. The sheet, its elements, PNG, PDF
@@ -232,8 +246,14 @@ goes `idle`, so `preserveDrawingBuffer` is not needed. A frozen image covers the
 | `printFrame` | The on-screen rectangle that will be printed |
 | `captureMap(map, { size, pixelRatio })` | A bare snapshot, with the `camera` it was taken at |
 | `planOrbit`, `planRoute`, `planHold` | Camera plans: centre, zoom, bearing and pitch per frame. `planRoute` takes `[lng, lat][]` |
-| `recordMap(map, plan, options)` | The video, with the options of `cartela/video` except `trail` |
+| `recordMap(map, plan, options)` | The video, with the options of `cartela/video`; `trail.route` is `[lng, lat][]` |
 | `overlays` | A function returning extra canvases to draw on top, such as an overlaid deck.gl canvas (created with `preserveDrawingBuffer`) |
+
+`trail` draws the growing route as `line` layers and a `circle` marker of the map itself (ids starting
+with `cartela-trail`), so it follows pitch, terrain and the globe, and removes them when the recording
+ends. Captures of one map wait in line: a second `exportMap` or `captureMap` started while another
+one runs waits for it to close instead of mixing up the pixel ratio, and its `signal` cancels it while
+it waits. `onTimeout` and `inset` work as in the core; the pending names are style source ids.
 
 MapLibre caps the canvas at `maxCanvasSize` (4096² by default); above it the capture is upscaled, so
 raise it on the map to print at high DPI. The scale bar measures at the centre of the view, and with

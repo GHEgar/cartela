@@ -16,5 +16,5 @@ export function previewMap(map: MaplibreMap, options: MaplibreExportOptions = {}
 export function printFrame(map: MaplibreMap, options: MaplibreExportOptions = {}): Box | null {
     const size = viewportSize(map);
     if (!size[0] || !size[1]) return null;
-    return fitRect(size, sheetAspect(options), options.padding);
+    return fitRect(size, sheetAspect(options), options.padding, options.inset);
 }

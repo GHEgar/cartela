@@ -1,4 +1,4 @@
-import type { MapSnapshot, SheetOptions, Size } from '../core/types.js';
+import type { Insets, MapSnapshot, SheetOptions, Size, TimeoutMode } from '../core/types.js';
 import type { FrameRecordOptions } from '../video/types.js';
 
 export type LngLat = [number, number];
@@ -43,15 +43,34 @@ export interface MaplibreMap {
     triggerRepaint(): void;
     on(type: 'render' | 'idle', listener: () => void): unknown;
     off(type: 'render' | 'idle', listener: () => void): unknown;
-    getStyle(): { layers?: readonly StyleLayerLike[] } | undefined;
+    getStyle(): { layers?: readonly StyleLayerLike[]; sources?: Record<string, unknown> } | undefined;
     getSource(id: string): { attribution?: string } | undefined;
+    isSourceLoaded?(id: string): boolean;
+}
+
+export interface MaplibreTrailMap extends MaplibreMap {
+    addSource(id: string, source: { type: 'geojson'; data: unknown }): unknown;
+    addLayer(layer: { id: string; type: string; source: string; layout?: object; paint?: object }): unknown;
+    getLayer(id: string): unknown;
+    removeLayer(id: string): unknown;
+    removeSource(id: string): unknown;
+}
+
+export interface MaplibreTrailOptions {
+    route: readonly LngLat[];
+    stroke?: string;
+    width?: number;
+    halo?: string;
+    marker?: boolean;
 }
 
 export interface CaptureOptions {
     camera?: Partial<Camera>;
     padding?: number;
+    inset?: Partial<Insets>;
     freeze?: boolean;
     timeout?: number;
+    onTimeout?: TimeoutMode;
     overlays?: () => readonly HTMLCanvasElement[];
     signal?: AbortSignal;
 }
@@ -67,4 +86,6 @@ export interface MaplibreSnapshot extends MapSnapshot {
 
 export interface MaplibreExportOptions extends SheetOptions, Omit<CaptureOptions, 'signal'> {}
 
-export interface MaplibreRecordOptions extends FrameRecordOptions<CameraFrame>, Omit<CaptureOptions, 'signal' | 'camera'> {}
+export interface MaplibreRecordOptions extends FrameRecordOptions<CameraFrame>, Omit<CaptureOptions, 'signal' | 'camera'> {
+    trail?: MaplibreTrailOptions;
+}

@@ -1,15 +1,17 @@
 import { DEFAULT_FRAME_PADDING, fitRect } from '../core/aspect.js';
-import { DEFAULT_TIMEOUT } from '../core/errors.js';
+import { DEFAULT_TIMEOUT, RenderTimeoutError } from '../core/errors.js';
 import type { Box, Size } from '../core/types.js';
 import { collectAttributions } from './attributions.js';
 import { cameraOf, jumpOptions, snapshotOf } from './camera.js';
 import { freezeMap, repaint, viewportSize, type MapFreeze } from './paint.js';
+import { acquire } from './queue.js';
 import type { Camera, CaptureMapOptions, CaptureOptions, MaplibreMap, MaplibreSnapshot } from './types.js';
 
 export interface CaptureFrame {
     canvas: HTMLCanvasElement;
     camera: Camera;
     attributions: string[];
+    pending?: string[];
 }
 
 export interface CaptureSession {
@@ -25,11 +27,32 @@ function draw(ctx: CanvasRenderingContext2D, source: HTMLCanvasElement, rect: Bo
     ctx.drawImage(source, rect.x * scale, rect.y * scale, rect.width * scale, rect.height * scale, 0, 0, output[0], output[1]);
 }
 
+export function pendingSources(map: MaplibreMap): string[] {
+    if (!map.isSourceLoaded) return [];
+    return Object.keys(map.getStyle()?.sources ?? {}).filter(id => {
+        try {
+            return map.isSourceLoaded?.(id) === false;
+        } catch {
+            return false;
+        }
+    });
+}
+
 export async function openCapture(map: MaplibreMap, output: Size, options: Omit<CaptureOptions, 'camera'> = {}): Promise<CaptureSession> {
+    const release = await acquire(map, options.signal);
+    try {
+        return await startCapture(map, output, options, release);
+    } catch (error) {
+        release();
+        throw error;
+    }
+}
+
+async function startCapture(map: MaplibreMap, output: Size, options: Omit<CaptureOptions, 'camera'>, release: () => void): Promise<CaptureSession> {
     const timeout = options.timeout ?? DEFAULT_TIMEOUT;
     const screen = viewportSize(map);
     if (!screen[0] || !screen[1]) throw new Error('The map container has no size');
-    const rect = fitRect(screen, output[0] / output[1], options.padding ?? DEFAULT_FRAME_PADDING);
+    const rect = fitRect(screen, output[0] / output[1], options.padding ?? DEFAULT_FRAME_PADDING, options.inset);
     const original = { camera: cameraOf(map), pixelRatio: map.getPixelRatio() };
     const followsDevice = original.pixelRatio === globalThis.devicePixelRatio;
 
@@ -44,18 +67,26 @@ export async function openCapture(map: MaplibreMap, output: Size, options: Omit<
     let moved = false;
     map.setPixelRatio(output[0] / rect.width);
 
+    const paint = (): CaptureFrame => {
+        ctx.clearRect(0, 0, output[0], output[1]);
+        draw(ctx, map.getCanvas(), rect, screen, output);
+        for (const overlay of options.overlays?.() ?? []) draw(ctx, overlay, rect, screen, output);
+        return { canvas, camera: cameraOf(map), attributions: collectAttributions(map) };
+    };
+
+    const late = (): CaptureFrame => {
+        const pending = pendingSources(map);
+        if (options.onTimeout !== 'capture') throw new RenderTimeoutError(timeout, pending);
+        return { ...paint(), pending };
+    };
+
     const render = async (camera?: Partial<Camera>, signal?: AbortSignal): Promise<CaptureFrame> => {
         if (!open) throw new Error('The capture session is closed');
         if (camera) {
             map.jumpTo(jumpOptions(camera));
             moved = true;
         }
-        return repaint(map, 'idle', timeout, signal, () => {
-            ctx.clearRect(0, 0, output[0], output[1]);
-            draw(ctx, map.getCanvas(), rect, screen, output);
-            for (const overlay of options.overlays?.() ?? []) draw(ctx, overlay, rect, screen, output);
-            return { canvas, camera: cameraOf(map), attributions: collectAttributions(map) };
-        });
+        return repaint(map, 'idle', timeout, signal, paint, late);
     };
 
     const close = (): void => {
@@ -63,14 +94,15 @@ export async function openCapture(map: MaplibreMap, output: Size, options: Omit<
         open = false;
         map.setPixelRatio(followsDevice ? (null as unknown as number) : original.pixelRatio);
         if (moved) map.jumpTo(jumpOptions(original.camera));
+        release();
         if (!frozen) return;
-        const release = (): void => {
+        const unfreeze = (): void => {
             clearTimeout(timer);
-            map.off('idle', release);
+            map.off('idle', unfreeze);
             frozen.release();
         };
-        const timer = setTimeout(release, timeout);
-        map.on('idle', release);
+        const timer = setTimeout(unfreeze, timeout);
+        map.on('idle', unfreeze);
         map.triggerRepaint();
     };
 

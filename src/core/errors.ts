@@ -17,8 +17,11 @@ export class TaintedCanvasError extends CartelaError {
 }
 
 export class RenderTimeoutError extends CartelaError {
-    constructor(ms: number) {
-        super(`The map did not finish rendering within ${ms} ms`);
+    readonly pending: string[];
+
+    constructor(ms: number, pending: string[] = []) {
+        super(`The map did not finish rendering within ${ms} ms${pending.length ? `. Still loading: ${pending.join(', ')}` : ''}`);
+        this.pending = pending;
     }
 }
 

@@ -1,5 +1,5 @@
 import { vi } from 'vitest';
-import type { Camera, MaplibreMap, StyleLayerLike } from '../../src/maplibre/types.js';
+import type { Camera, MaplibreTrailMap, StyleLayerLike } from '../../src/maplibre/types.js';
 
 export interface Draw {
     source: unknown;
@@ -29,9 +29,18 @@ export interface DoubleOptions {
     layers?: StyleLayerLike[];
     sources?: Record<string, string>;
     idle?: boolean;
+    loading?: string[];
 }
 
-export interface MapDouble extends MaplibreMap {
+export interface GeoJsonDouble {
+    attribution?: string;
+    data: unknown;
+    setData: (data: unknown) => void;
+}
+
+export interface MapDouble extends MaplibreTrailMap {
+    readonly added: Map<string, GeoJsonDouble>;
+    readonly styleLayers: Map<string, unknown>;
     readonly calls: string[];
     readonly jumps: Partial<Camera>[];
     readonly ratios: (number | null)[];
@@ -54,6 +63,9 @@ export function mapDouble(options: DoubleOptions = {}): MapDouble {
     const calls: string[] = [];
     const jumps: Partial<Camera>[] = [];
     const ratios: (number | null)[] = [];
+    const added = new Map<string, GeoJsonDouble>();
+    const styleLayers = new Map<string, unknown>();
+    const loading = options.loading ?? [];
 
     const applied = (): number => override ?? globalThis.devicePixelRatio;
     const resize = (): void => {
@@ -67,6 +79,8 @@ export function mapDouble(options: DoubleOptions = {}): MapDouble {
     };
 
     return {
+        added,
+        styleLayers,
         calls,
         jumps,
         ratios,
@@ -106,10 +120,30 @@ export function mapDouble(options: DoubleOptions = {}): MapDouble {
         off: (type, listener) => {
             listeners.get(type)?.delete(listener);
         },
-        getStyle: () => ({ layers: options.layers ?? [] }),
+        getStyle: () => ({
+            layers: options.layers ?? [],
+            sources: Object.fromEntries([...Object.keys(options.sources ?? {}), ...loading].map(id => [id, {}])),
+        }),
         getSource: id => {
+            const geojson = added.get(id);
+            if (geojson) return geojson;
             const attribution = options.sources?.[id];
             return attribution === undefined ? undefined : { attribution };
+        },
+        isSourceLoaded: id => !loading.includes(id),
+        addSource: (id, source) => {
+            const geojson: GeoJsonDouble = { data: source.data, setData: data => { geojson.data = data; } };
+            added.set(id, geojson);
+        },
+        addLayer: layer => {
+            styleLayers.set(layer.id, layer);
+        },
+        getLayer: id => styleLayers.get(id),
+        removeLayer: id => {
+            styleLayers.delete(id);
+        },
+        removeSource: id => {
+            added.delete(id);
         },
     };
 }

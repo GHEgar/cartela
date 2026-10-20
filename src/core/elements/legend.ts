@@ -9,6 +9,7 @@ export interface LegendOptions {
     symbolSize?: number;
     histogram?: boolean;
     format?: ValueFormat;
+    colorScope?: Element;
 }
 
 interface Placed {
@@ -135,7 +136,7 @@ export function legend(entries: readonly LegendEntry[], options: LegendOptions =
         slot: 'panel',
         grow: true,
         load: async (env, signal) => {
-            resolved = await resolveEntries(entries, env, signal, options.histogram ?? false);
+            resolved = await resolveEntries(entries, env, signal, options.histogram ?? false, options.colorScope);
         },
         measure: (ctx, width, env) => naturalHeight(ctx, resolved, options, true, width, env),
         draw: (ctx, box, env) => part().draw(ctx, box, env),

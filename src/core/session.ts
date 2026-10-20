@@ -3,23 +3,29 @@ import type MapEvent from 'ol/MapEvent.js';
 import { collectAttributions, layerLabel } from './attributions.js';
 import { abortError, DEFAULT_TIMEOUT, RenderTimeoutError, TaintedCanvasError, throwIfAborted } from './errors.js';
 import { freeze } from './freeze.js';
+import { trackPending, type PendingTracker } from './pending.js';
 import { rotatedExtent } from './geo.js';
-import type { MapSession, MapSnapshot, SessionOptions, Size, ViewState } from './types.js';
+import type { MapSession, MapSnapshot, SessionOptions, Size, TimeoutMode, ViewState } from './types.js';
 
 export { DEFAULT_TIMEOUT };
 
-function waitForRender(map: OlMap, timeout: number, signal?: AbortSignal): Promise<void> {
+function waitForRender(map: OlMap, timeout: number, tracker: PendingTracker, mode: TimeoutMode, signal?: AbortSignal): Promise<string[] | null> {
     return new Promise((resolve, reject) => {
-        const done = (error?: Error): void => {
+        const done = (error?: Error, pending: string[] | null = null): void => {
             clearTimeout(timer);
             map.un('rendercomplete', onComplete);
             signal?.removeEventListener('abort', onAbort);
             if (error) reject(error);
-            else resolve();
+            else resolve(pending);
         };
         const onComplete = (): void => done();
         const onAbort = (): void => done(abortError(signal));
-        const timer = setTimeout(() => done(new RenderTimeoutError(timeout)), timeout);
+        const onTimeout = (): void => {
+            const pending = tracker.pending();
+            if (mode === 'capture') done(undefined, pending);
+            else done(new RenderTimeoutError(timeout, pending));
+        };
+        const timer = setTimeout(onTimeout, timeout);
         map.on('rendercomplete', onComplete);
         signal?.addEventListener('abort', onAbort, { once: true });
         map.render();
@@ -61,6 +67,7 @@ export function openSession(map: OlMap, options: SessionOptions): MapSession {
         if (event.frameState) collectAttributions(event.frameState, attributions);
     };
     const frozen = options.freeze === false ? null : freeze(map);
+    const tracker = trackPending(map);
     let open = true;
 
     map.setTarget(canvas);
@@ -75,7 +82,7 @@ export function openSession(map: OlMap, options: SessionOptions): MapSession {
         view.setRotation(state.rotation);
         view.setCenter(state.center);
         view.setResolution(state.resolution);
-        await waitForRender(map, timeout, signal);
+        const pending = await waitForRender(map, timeout, tracker, options.onTimeout ?? 'error', signal);
         assertReadable(canvas, map);
         const center = view.getCenter() ?? state.center;
         const resolution = view.getResolution() ?? state.resolution;
@@ -90,12 +97,14 @@ export function openSession(map: OlMap, options: SessionOptions): MapSession {
             projection: view.getProjection(),
             extent: rotatedExtent(center, resolution, rotation, size),
             attributions: [...attributions],
+            ...(pending ? { pending } : {}),
         };
     };
 
     const close = (): void => {
         if (!open) return;
         open = false;
+        tracker.stop();
         map.un('postrender', onPostrender);
         view.setRotation(original.rotation);
         if (original.center) view.setCenter(original.center);

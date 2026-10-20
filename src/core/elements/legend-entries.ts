@@ -1,6 +1,7 @@
 import type OlMap from 'ol/Map.js';
 import { imageSize, loadImage } from './draw.js';
 import { layerLabel } from '../attributions.js';
+import { cssColor } from '../color.js';
 import type { DrawEnv } from '../types.js';
 import { layerParts, type HistogramBar, type LayerLegend, type LegendStopItem } from './legend-layer.js';
 
@@ -82,7 +83,18 @@ function withLabel(entry: Extract<ResolvedEntry, { kind: 'image' }>, label: stri
     return label === undefined ? entry : { ...entry, label };
 }
 
-export async function resolveEntries(entries: readonly LegendEntry[], env: DrawEnv, signal?: AbortSignal, histogram = false): Promise<ResolvedEntry[]> {
+function withColors(entry: ResolvedEntry, scope?: Element): ResolvedEntry {
+    const color = (value: string): string => cssColor(value, scope);
+    if (entry.kind === 'histogram') return { ...entry, bars: entry.bars.map(bar => ({ ...bar, color: color(bar.color) })) };
+    if (entry.kind === 'ramp') return { ...entry, stops: entry.stops.map(stop => ({ ...stop, color: color(stop.color) })) };
+    if (entry.kind !== 'symbol') return entry;
+    const symbol: SymbolEntry = { ...entry.entry };
+    if (symbol.fill !== undefined) symbol.fill = color(symbol.fill);
+    if (symbol.stroke !== undefined) symbol.stroke = color(symbol.stroke);
+    return { kind: 'symbol', entry: symbol };
+}
+
+export async function resolveEntries(entries: readonly LegendEntry[], env: DrawEnv, signal?: AbortSignal, histogram = false, scope?: Element): Promise<ResolvedEntry[]> {
     const resolved = await Promise.all(entries.map(entry => resolveOne(entry, env, signal, histogram)));
-    return resolved.flatMap(entry => (entry === null ? [] : Array.isArray(entry) ? entry : [entry]));
+    return resolved.flatMap(entry => (entry === null ? [] : Array.isArray(entry) ? entry : [entry])).map(entry => withColors(entry, scope));
 }

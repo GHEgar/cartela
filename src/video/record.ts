@@ -14,6 +14,7 @@ export function recordMap(map: OlMap, plan: FramePlan, options: RecordOptions): 
             pixelRatio: 1,
             freeze: options.freeze !== false,
             ...(options.timeout === undefined ? {} : { timeout: options.timeout }),
+            ...(options.onTimeout ? { onTimeout: options.onTimeout } : {}),
         });
         const trail = options.trail ? addTrail(map, options.trail, resolveTheme(options.theme)) : null;
         return {

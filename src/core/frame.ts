@@ -8,7 +8,7 @@ export { fitRect, sheetAspect, DEFAULT_FRAME_PADDING } from './aspect.js';
 export function printFrame(map: OlMap, options: ExportOptions = {}): Box | null {
     const size = map.getSize();
     if (!size || !size[0] || !size[1]) return null;
-    return fitRect([size[0], size[1]], sheetAspect(options), options.padding);
+    return fitRect([size[0], size[1]], sheetAspect(options), options.padding, options.inset);
 }
 
 export function watchPrintFrame(

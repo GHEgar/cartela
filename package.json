@@ -1,6 +1,6 @@
 {
     "name": "cartela",
-    "version": "0.5.0",
+    "version": "0.6.0",
     "description": "Headless print and video export for OpenLayers and MapLibre maps: sheet, legends, scale bar, graticule, PNG, PDF, MP4 and GIF.",
     "keywords": [
         "openlayers",
